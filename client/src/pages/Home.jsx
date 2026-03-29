@@ -38,8 +38,8 @@ function StatCard({ Icon, label, value, sub, colorClass, glowClass, iconBg, icon
           <Icon className={`w-5 h-5 ${iconText}`} />
         </div>
         <div className="flex items-center gap-1.5 pt-0.5">
-          <span className={`w-1.5 h-1.5 rounded-full live-dot relative ${iconText}`} />
-          <span className="text-[10px] font-semibold uppercase tracking-widest text-gray-500 dark:text-[#3d4a5c]">Live</span>
+          <span className="w-1.5 h-1.5 rounded-full live-dot relative" />
+          <span className="text-[10px] font-semibold uppercase tracking-widest text-red-400 dark:text-red-400">Live</span>
         </div>
       </div>
 
@@ -190,8 +190,8 @@ export default function Home() {
               <p className="text-sm font-bold text-gray-900 dark:text-[#dae2fd]">Score Trend</p>
               <p className="text-xs font-medium text-gray-600 dark:text-[#6b7a94] mt-0.5">Last {chartData.length} analyses</p>
             </div>
-            <span className="flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 dark:bg-[#c0c1ff]/8 border border-blue-200 dark:border-[#c0c1ff]/15 rounded-lg text-[10px] font-semibold text-blue-600 dark:text-[#c0c1ff] uppercase tracking-wider">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-[#c0c1ff] live-dot relative" />Live
+            <span className="flex items-center gap-1.5 text-[10px] font-semibold text-red-500 dark:text-red-400 uppercase tracking-wider">
+              <span className="w-1.5 h-1.5 rounded-full live-dot relative" />Live
             </span>
           </div>
           {loading ? <Skeleton className="h-20" /> : chartData.length > 0 ? (

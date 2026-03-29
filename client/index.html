@@ -165,32 +165,24 @@
       /* ── Live dot pulse ── */
       @keyframes livePulse {
         0%, 100% { opacity: 1; transform: scale(1); }
-        50%       { opacity: 0.5; transform: scale(1.2); }
+        50%       { opacity: 0.6; transform: scale(1.25); }
       }
-      .live-dot { 
-        animation: livePulse 1.5s ease-in-out infinite;
-        box-shadow: 0 0 0 0 currentColor;
+      .live-dot {
+        background-color: #ef4444 !important;
+        animation: livePulse 1.2s ease-in-out infinite;
+        box-shadow: 0 0 6px rgba(239,68,68,0.7);
       }
       @keyframes liveRing {
-        0% { 
-          box-shadow: 0 0 0 0 currentColor;
-          opacity: 0.8;
-        }
-        50% {
-          box-shadow: 0 0 0 4px currentColor;
-          opacity: 0;
-        }
-        100% {
-          box-shadow: 0 0 0 0 currentColor;
-          opacity: 0;
-        }
+        0%   { box-shadow: 0 0 0 0 rgba(239,68,68,0.7); opacity: 0.9; }
+        70%  { box-shadow: 0 0 0 5px rgba(239,68,68,0);  opacity: 0; }
+        100% { box-shadow: 0 0 0 0 rgba(239,68,68,0);    opacity: 0; }
       }
       .live-dot::before {
         content: '';
         position: absolute;
         inset: 0;
         border-radius: inherit;
-        animation: liveRing 1.5s ease-in-out infinite;
+        animation: liveRing 1.2s ease-out infinite;
       }
 
       /* ── Row hover: bg only, no layout shift ── */

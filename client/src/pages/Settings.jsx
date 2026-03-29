@@ -377,6 +377,7 @@ export default function Settings() {
   )
 
   return (
+    <>
     <div className="max-w-5xl mx-auto space-y-10 text-gray-700 dark:text-slate-300 px-4 pb-16">
       {/* Header */}
       <section className="mb-8">
@@ -506,6 +507,15 @@ export default function Settings() {
                         <span className="material-symbols-outlined text-[20px]">{showCurrentPassword ? 'visibility_off' : 'visibility'}</span>
                       </button>
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => { setFpOpen(true); setFpEmail(user?.email || '') }}
+                      className="group mt-2.5 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-dashed border-slate-200 dark:border-white/10 hover:border-[#A6ADFF]/40 dark:hover:border-[#A6ADFF]/40 bg-transparent hover:bg-[#A6ADFF]/5 transition-all duration-200 w-fit"
+                    >
+                      <span className="material-symbols-outlined text-[13px] text-slate-400 dark:text-slate-500 group-hover:text-[#A6ADFF] transition-colors duration-200">lock_reset</span>
+                      <span className="text-[12px] font-semibold text-slate-400 dark:text-slate-500 group-hover:text-[#A6ADFF] transition-colors duration-200 tracking-wide">Forgot your password?</span>
+                      <span className="material-symbols-outlined text-[11px] text-slate-300 dark:text-slate-600 group-hover:text-[#A6ADFF]/70 group-hover:translate-x-0.5 transition-all duration-200">arrow_forward</span>
+                    </button>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
@@ -780,5 +790,150 @@ export default function Settings() {
         </div>
       </div>
     </div>
+
+      {/* Forgot Password Modal */}
+
+      {fpOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+          <div className="bg-white dark:bg-[#161B2B] rounded-[24px] border border-gray-200 dark:border-slate-800 p-8 w-full max-w-md shadow-2xl relative">
+            <button
+              onClick={resetFpFlow}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+            >
+              <span className="material-symbols-outlined">close</span>
+            </button>
+
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-pink-400/10 dark:bg-[#2E1E35] flex items-center justify-center">
+                <span className="material-symbols-outlined text-pink-400">lock_reset</span>
+              </div>
+              <h4 className="text-[20px] font-bold text-gray-900 dark:text-white">Reset Password</h4>
+            </div>
+
+            {/* Step indicators */}
+            <div className="flex items-center gap-2 mb-8">
+              {[1,2,3].map(s => (
+                <div key={s} className={`h-1.5 flex-1 rounded-full transition-all ${
+                  fpSuccess ? 'bg-green-400' : s <= fpStep ? 'bg-[#A6ADFF]' : 'bg-gray-200 dark:bg-slate-700'
+                }`} />
+              ))}
+            </div>
+
+            {fpSuccess ? (
+              <div className="text-center space-y-4">
+                <span className="material-symbols-outlined text-green-400 text-[48px]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                <p className="text-[15px] font-semibold text-gray-900 dark:text-white">{fpSuccess}</p>
+                <button onClick={resetFpFlow} className="bg-[#B4B9FF] text-[#0B0F19] font-bold text-[14px] px-6 py-3 rounded-xl hover:bg-[#9FA5FC] transition-colors">
+                  Done
+                </button>
+              </div>
+            ) : fpStep === 1 ? (
+              <form onSubmit={handleFpSendOtp} className="space-y-5">
+                <div className="space-y-2">
+                  <label className="text-[13px] font-semibold text-gray-600 dark:text-slate-400">Email Address</label>
+                  <input
+                    type="email"
+                    value={fpEmail}
+                    onChange={e => { setFpEmail(e.target.value); setFpError(''); setFpNotReg(false) }}
+                    placeholder="name@example.com"
+                    className="w-full bg-gray-50 dark:bg-[#0D111C] border-2 border-gray-200 dark:border-transparent focus:border-blue-600 dark:focus:border-[#A6ADFF] rounded-xl px-4 py-3.5 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-600 outline-none transition-all text-[15px] font-semibold"
+                  />
+                </div>
+                {fpNotReg && (
+                  <div className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-[13px] font-semibold bg-yellow-500/10 border border-yellow-500/20 text-yellow-400">
+                    <span className="material-symbols-outlined text-[18px]">info</span>
+                    No account found. <Link to="/register" onClick={resetFpFlow} className="underline ml-1">Register here</Link>
+                  </div>
+                )}
+                {fpError && (
+                  <div className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-[13px] font-semibold bg-red-500/10 border border-red-500/20 text-red-400">
+                    <span className="material-symbols-outlined text-[18px]">error</span>
+                    {fpError}
+                  </div>
+                )}
+                <button
+                  type="submit"
+                  disabled={fpLoading || !fpEmail}
+                  className="w-full bg-[#B4B9FF] text-[#0B0F19] font-bold text-[14px] py-3.5 rounded-xl flex items-center justify-center gap-2 hover:bg-[#9FA5FC] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {fpLoading ? <><span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>Sending...</> : <>Send OTP <span className="material-symbols-outlined text-[18px]">send</span></>}
+                </button>
+              </form>
+            ) : fpStep === 2 ? (
+              <form onSubmit={handleFpVerifyOtp} className="space-y-5">
+                <p className="text-[13px] text-gray-600 dark:text-slate-400 font-medium">OTP sent to <span className="text-gray-900 dark:text-white font-bold">{fpEmail}</span></p>
+                <div className="space-y-2">
+                  <label className="text-[13px] font-semibold text-gray-600 dark:text-slate-400">Enter OTP</label>
+                  <input
+                    type="text"
+                    value={fpOtp}
+                    onChange={e => { setFpOtp(e.target.value); setFpError('') }}
+                    placeholder="6-digit code"
+                    maxLength={6}
+                    className="w-full bg-gray-50 dark:bg-[#0D111C] border-2 border-gray-200 dark:border-transparent focus:border-blue-600 dark:focus:border-[#A6ADFF] rounded-xl px-4 py-3.5 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-600 outline-none transition-all text-[20px] font-bold tracking-[0.5em] text-center"
+                  />
+                </div>
+                {fpError && (
+                  <div className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-[13px] font-semibold bg-red-500/10 border border-red-500/20 text-red-400">
+                    <span className="material-symbols-outlined text-[18px]">error</span>
+                    {fpError}
+                  </div>
+                )}
+                <button
+                  type="submit"
+                  disabled={fpLoading || fpOtp.length < 6}
+                  className="w-full bg-[#B4B9FF] text-[#0B0F19] font-bold text-[14px] py-3.5 rounded-xl flex items-center justify-center gap-2 hover:bg-[#9FA5FC] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {fpLoading ? <><span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>Verifying...</> : <>Verify OTP <span className="material-symbols-outlined text-[18px]">verified</span></>}
+                </button>
+                <div className="text-center">
+                  {fpCooldown > 0 ? (
+                    <span className="text-[12px] text-gray-500 dark:text-slate-500">Resend in {fpCooldown}s</span>
+                  ) : (
+                    <button type="button" onClick={handleFpSendOtp} className="text-[12px] text-blue-500 dark:text-[#A6ADFF] hover:underline font-semibold">Resend OTP</button>
+                  )}
+                </div>
+              </form>
+            ) : (
+              <form onSubmit={handleFpReset} className="space-y-5">
+                <div className="space-y-2">
+                  <label className="text-[13px] font-semibold text-gray-600 dark:text-slate-400">New Password</label>
+                  <input
+                    type="password"
+                    value={fpNewPass}
+                    onChange={e => { setFpNewPass(e.target.value); setFpError('') }}
+                    placeholder="Minimum 6 characters"
+                    className="w-full bg-gray-50 dark:bg-[#0D111C] border-2 border-gray-200 dark:border-transparent focus:border-blue-600 dark:focus:border-[#A6ADFF] rounded-xl px-4 py-3.5 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-600 outline-none transition-all text-[15px] font-semibold"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[13px] font-semibold text-gray-600 dark:text-slate-400">Confirm Password</label>
+                  <input
+                    type="password"
+                    value={fpConfirm}
+                    onChange={e => { setFpConfirm(e.target.value); setFpError('') }}
+                    placeholder="Must match new password"
+                    className="w-full bg-gray-50 dark:bg-[#0D111C] border-2 border-gray-200 dark:border-transparent focus:border-blue-600 dark:focus:border-[#A6ADFF] rounded-xl px-4 py-3.5 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-600 outline-none transition-all text-[15px] font-semibold"
+                  />
+                </div>
+                {fpError && (
+                  <div className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-[13px] font-semibold bg-red-500/10 border border-red-500/20 text-red-400">
+                    <span className="material-symbols-outlined text-[18px]">error</span>
+                    {fpError}
+                  </div>
+                )}
+                <button
+                  type="submit"
+                  disabled={fpLoading || !fpNewPass || !fpConfirm}
+                  className="w-full bg-[#B4B9FF] text-[#0B0F19] font-bold text-[14px] py-3.5 rounded-xl flex items-center justify-center gap-2 hover:bg-[#9FA5FC] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {fpLoading ? <><span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>Resetting...</> : <>Reset Password <span className="material-symbols-outlined text-[18px]">lock_reset</span></>}
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
+    </>
   )
 }
