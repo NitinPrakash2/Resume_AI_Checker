@@ -16,7 +16,7 @@ export default function Landing() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#070d1a] text-gray-900 dark:text-white transition-colors duration-300">
+    <div className="min-h-screen bg-white dark:bg-[#070d1a] text-gray-900 dark:text-white transition-colors duration-300" style={{ isolation: 'isolate' }}>
 
       {/* Mobile drawer backdrop */}
       <div
@@ -74,11 +74,16 @@ export default function Landing() {
       </div>
 
       {/* Navbar */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? 'bg-white/80 dark:bg-[#070d1a]/70 backdrop-blur-md border-b border-gray-200 dark:border-white/10 shadow-lg shadow-black/5 dark:shadow-black/10'
-          : 'bg-transparent'
-      }`}>
+      <nav className="fixed top-0 left-0 right-0 z-50 transition-all duration-300" style={{
+        background: scrolled
+          ? dark ? 'rgba(7,13,26,0.92)' : 'rgba(255,255,255,0.92)'
+          : dark ? 'rgba(7,13,26,1)' : 'rgba(255,255,255,1)',
+        backdropFilter: scrolled ? 'blur(12px)' : 'none',
+        borderBottom: scrolled
+          ? dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(229,231,235,0.8)'
+          : '1px solid transparent',
+        boxShadow: scrolled ? '0 1px 12px rgba(0,0,0,0.08)' : 'none',
+      }}>
         <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}

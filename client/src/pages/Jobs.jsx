@@ -125,20 +125,57 @@ function JobCard({ job, onEdit, onDelete, onStatus }) {
   )
 }
 
+function Toast({ toasts }) {
+  return (
+    <div className="fixed bottom-6 right-6 z-[100] flex flex-col gap-2 pointer-events-none">
+      {toasts.map(t => (
+        <div key={t.id} className={`flex items-center gap-3 px-4 py-3 rounded-2xl shadow-2xl border text-sm font-semibold animate-fade-up pointer-events-auto ${
+          t.type === 'success'
+            ? 'bg-white dark:bg-[#0f1829] border-green-400/30 text-gray-900 dark:text-[#dae2fd]'
+            : t.type === 'error'
+            ? 'bg-white dark:bg-[#0f1829] border-red-400/30 text-gray-900 dark:text-[#dae2fd]'
+            : 'bg-white dark:bg-[#0f1829] border-yellow-400/30 text-gray-900 dark:text-[#dae2fd]'
+        }`}>
+          <span className={`material-symbols-outlined text-[18px] ${
+            t.type === 'success' ? 'text-green-400' : t.type === 'error' ? 'text-red-400' : 'text-yellow-400'
+          }`}>
+            {t.type === 'success' ? 'bookmark_added' : t.type === 'error' ? 'error' : 'info'}
+          </span>
+          {t.msg}
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export default function Jobs() {
   const [jobs, setJobs] = useState([])
   const [loading, setLoading] = useState(true)
   const [modal, setModal] = useState(null)
-  const [confirmDialog, setConfirmDialog] = useState(null) // { id }
+  const [confirmDialog, setConfirmDialog] = useState(null)
   const [filter, setFilter] = useState('all')
   const [search, setSearch] = useState('')
   const [matchedJobs, setMatchedJobs] = useState([])
   const [loadingMatches, setLoadingMatches] = useState(false)
-  const [viewMode, setViewMode] = useState('ai') // 'ai' or 'manual'
+  const [viewMode, setViewMode] = useState('ai')
   const [manualSearch, setManualSearch] = useState('')
   const [manualLocation, setManualLocation] = useState('')
   const [manualJobs, setManualJobs] = useState([])
   const [loadingManual, setLoadingManual] = useState(false)
+  const [savingJob, setSavingJob] = useState(null) // index being saved
+  const [toasts, setToasts] = useState([])
+
+  const showToast = (msg, type = 'success') => {
+    const id = Date.now()
+    setToasts(t => [...t, { id, msg, type }])
+    setTimeout(() => setToasts(t => t.filter(x => x.id !== id)), 3500)
+  }
+
+  const isAlreadySaved = (job) =>
+    jobs.some(j =>
+      j.title.toLowerCase() === job.title.toLowerCase() &&
+      (j.company || '').toLowerCase() === (job.company || '').toLowerCase()
+    )
 
   const load = () => getJobs().then(setJobs).catch(console.error).finally(() => setLoading(false))
 
@@ -181,7 +218,12 @@ export default function Jobs() {
     }
   }
 
-  const addJobToTracker = async (job) => {
+  const addJobToTracker = async (job, idx, source) => {
+    if (isAlreadySaved(job)) {
+      showToast(`"${job.title}" is already in your tracker`, 'warn')
+      return
+    }
+    setSavingJob(`${source}-${idx}`)
     try {
       await createJob({
         title: job.title,
@@ -193,8 +235,11 @@ export default function Jobs() {
         notes: ''
       })
       await load()
+      showToast(`"${job.title}" saved to your tracker!`, 'success')
     } catch {
-      // silently fail
+      showToast('Failed to save job. Try again.', 'error')
+    } finally {
+      setSavingJob(null)
     }
   }
   
@@ -317,8 +362,21 @@ export default function Jobs() {
                         {job.url && <a href={job.url} target="_blank" rel="noreferrer" className="flex-1 py-1.5 bg-blue-600/10 dark:bg-primary/10 border border-blue-600/20 dark:border-primary/20 text-blue-600 dark:text-primary text-xs font-bold rounded-xl hover:bg-blue-600/20 dark:hover:bg-primary/20 transition-all text-center">
                           View Job
                         </a>}
-                        <button onClick={() => addJobToTracker(job)} className="px-3 py-1.5 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/8 text-gray-700 dark:text-[#8892a4] text-xs rounded-xl hover:bg-gray-200 dark:hover:bg-white/10 transition-all font-bold">
-                          Track
+                        <button
+                          onClick={() => addJobToTracker(job, idx, 'ai')}
+                          disabled={savingJob === `ai-${idx}` || isAlreadySaved(job)}
+                          className={`flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-xl font-bold transition-all border ${
+                            isAlreadySaved(job)
+                              ? 'bg-green-400/10 border-green-400/20 text-green-400 cursor-default'
+                              : 'bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-white/8 text-gray-700 dark:text-[#8892a4] hover:bg-primary/10 hover:border-primary/20 hover:text-primary dark:hover:text-primary'
+                          }`}
+                        >
+                          {savingJob === `ai-${idx}` ? (
+                            <span className="material-symbols-outlined text-sm animate-spin">progress_activity</span>
+                          ) : (
+                            <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: isAlreadySaved(job) ? "'FILL' 1" : "'FILL' 0" }}>bookmark</span>
+                          )}
+                          {isAlreadySaved(job) ? 'Saved' : 'Save'}
                         </button>
                       </div>
                     </div>
@@ -375,8 +433,21 @@ export default function Jobs() {
                       {job.url && <a href={job.url} target="_blank" rel="noreferrer" className="flex-1 py-1.5 bg-blue-600/10 dark:bg-primary/10 border border-blue-600/20 dark:border-primary/20 text-blue-600 dark:text-primary text-xs font-bold rounded-xl hover:bg-blue-600/20 dark:hover:bg-primary/20 transition-all text-center">
                         View Job
                       </a>}
-                      <button onClick={() => addJobToTracker(job)} className="px-3 py-1.5 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/8 text-gray-700 dark:text-[#8892a4] text-xs rounded-xl hover:bg-gray-200 dark:hover:bg-white/10 transition-all font-bold">
-                        Track
+                      <button
+                        onClick={() => addJobToTracker(job, idx, 'manual')}
+                        disabled={savingJob === `manual-${idx}` || isAlreadySaved(job)}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-xl font-bold transition-all border ${
+                          isAlreadySaved(job)
+                            ? 'bg-green-400/10 border-green-400/20 text-green-400 cursor-default'
+                            : 'bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-white/8 text-gray-700 dark:text-[#8892a4] hover:bg-primary/10 hover:border-primary/20 hover:text-primary dark:hover:text-primary'
+                        }`}
+                      >
+                        {savingJob === `manual-${idx}` ? (
+                          <span className="material-symbols-outlined text-sm animate-spin">progress_activity</span>
+                        ) : (
+                          <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: isAlreadySaved(job) ? "'FILL' 1" : "'FILL' 0" }}>bookmark</span>
+                        )}
+                        {isAlreadySaved(job) ? 'Saved' : 'Save'}
                       </button>
                     </div>
                   </div>
@@ -442,6 +513,8 @@ export default function Jobs() {
         onConfirm={handleDeleteConfirm}
         onCancel={() => setConfirmDialog(null)}
       />
+
+      <Toast toasts={toasts} />
     </div>
   )
 }
