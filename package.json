@@ -1,0 +1,9 @@
+{
+  "name": "resume-ai",
+  "version": "1.0.0",
+  "scripts": {
+    "client": "cd client && npm run dev",
+    "server": "cd server && node server.js",
+    "install:all": "cd client && npm install && cd ../server && npm install"
+  }
+}

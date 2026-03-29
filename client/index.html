@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kinetic Architect | AI Resume Analyzer</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "inverse-primary": "#494bd6",
+              "surface-container": "#171f33",
+              "on-tertiary": "#502400",
+              "on-surface-variant": "#c2c6d6",
+              "on-secondary-fixed": "#0d1c2d",
+              "inverse-on-surface": "#283044",
+              "outline-variant": "#424754",
+              "secondary": "#b9c8de",
+              "secondary-container": "#39485a",
+              "inverse-surface": "#dae2fd",
+              "tertiary-container": "#df7412",
+              "surface-container-low": "#131b2e",
+              "tertiary-fixed": "#ffdcc6",
+              "on-background": "#dae2fd",
+              "primary-fixed": "#e1e0ff",
+              "on-secondary-container": "#a7b6cc",
+              "outline": "#8c909f",
+              "surface-tint": "#c0c1ff",
+              "on-primary": "#1000a9",
+              "tertiary": "#ffb786",
+              "on-surface": "#dae2fd",
+              "surface-container-lowest": "#060e20",
+              "on-primary-fixed": "#07006c",
+              "secondary-fixed": "#d4e4fa",
+              "tertiary-fixed-dim": "#ffb786",
+              "on-tertiary-fixed-variant": "#723600",
+              "on-primary-container": "#0d0096",
+              "on-primary-fixed-variant": "#2f2ebe",
+              "surface-dim": "#0b1326",
+              "surface": "#0b1326",
+              "primary": "#c0c1ff",
+              "surface-container-highest": "#2d3449",
+              "on-error-container": "#ffdad6",
+              "primary-fixed-dim": "#c0c1ff",
+              "on-secondary": "#233143",
+              "primary-container": "#8083ff",
+              "secondary-fixed-dim": "#b9c8de",
+              "error": "#ffb4ab",
+              "on-tertiary-fixed": "#311400",
+              "surface-container-high": "#222a3d",
+              "on-tertiary-container": "#461f00",
+              "surface-bright": "#31394d",
+              "background": "#0b1326",
+              "on-error": "#690005",
+              "surface-variant": "#2d3449",
+              "error-container": "#93000a",
+              "on-secondary-fixed-variant": "#39485a"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: { "DEFAULT": "0.375rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "3xl": "1.5rem", "full": "9999px" },
+          },
+        },
+      }
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      * { scrollbar-width: none; }
+      @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(16px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+      }
+      @keyframes scaleIn {
+        from { opacity: 0; transform: scale(0.95); }
+        to   { opacity: 1; transform: scale(1); }
+      }
+      @keyframes slideInRight {
+        from { opacity: 0; transform: translateX(20px); }
+        to   { opacity: 1; transform: translateX(0); }
+      }
+      @keyframes shimmer {
+        0%   { background-position: -400px 0; }
+        100% { background-position: 400px 0; }
+      }
+      @keyframes shimmerBar {
+        0%   { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+      }
+      @keyframes pulse-ring {
+        0%   { transform: scale(1); opacity: 0.6; }
+        100% { transform: scale(1.5); opacity: 0; }
+      }
+      .animate-fade-up   { animation: fadeInUp 0.4s ease both; }
+      .animate-fade-up-2 { animation: fadeInUp 0.4s ease 0.08s both; }
+      .animate-fade-up-3 { animation: fadeInUp 0.4s ease 0.16s both; }
+      .animate-fade-up-4 { animation: fadeInUp 0.4s ease 0.24s both; }
+      .animate-fade-in { animation: fadeIn 0.3s ease both; }
+      .animate-scale-in { animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both; }
+      .animate-slide-in-right { animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+      .animate-shimmer { animation: shimmerBar 2s infinite; }
+      .skeleton {
+        background: linear-gradient(90deg, #171f33 25%, #222a3d 50%, #171f33 75%);
+        background-size: 400px 100%;
+        animation: shimmer 1.4s infinite;
+      }
+      .dark .skeleton {
+        background: linear-gradient(90deg, #171f33 25%, #222a3d 50%, #171f33 75%);
+      }
+      :not(.dark) .skeleton {
+        background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+      }
+      .glass { background: rgba(23,31,51,0.7); backdrop-filter: blur(16px); }
+      .dark .glass { background: rgba(23,31,51,0.7); }
+      :not(.dark) .glass { background: rgba(255,255,255,0.7); }
+
+      /* ── Card hover: clean lift + soft shadow only ── */
+      .card-hover {
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      }
+      .card-hover:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+      }
+
+      /* ── Stat card: border brightens on hover ── */
+      .stat-card-primary:hover  { border-color: rgba(192,193,255,0.25) !important; }
+      .stat-card-blue:hover     { border-color: rgba(96,165,250,0.25) !important; }
+      .stat-card-yellow:hover   { border-color: rgba(250,204,21,0.25) !important; }
+      .stat-card-green:hover    { border-color: rgba(74,222,128,0.25) !important; }
+
+      /* ── Icon scale on its own hover (not card hover) ── */
+      .icon-wrap {
+        transition: transform 0.2s ease, background 0.2s ease;
+      }
+      .icon-wrap:hover { transform: scale(1.1); }
+
+      /* ── Number count-up ── */
+      @keyframes countUp {
+        from { opacity: 0; transform: translateY(6px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      .count-up { animation: countUp 0.45s ease both; }
+
+      /* ── Progress bar fill ── */
+      @keyframes fillBar {
+        from { width: 0; }
+      }
+      .fill-bar { animation: fillBar 1s cubic-bezier(.22,1,.36,1) both; }
+
+      /* ── Live dot pulse ── */
+      @keyframes livePulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50%       { opacity: 0.5; transform: scale(1.2); }
+      }
+      .live-dot { 
+        animation: livePulse 1.5s ease-in-out infinite;
+        box-shadow: 0 0 0 0 currentColor;
+      }
+      @keyframes liveRing {
+        0% { 
+          box-shadow: 0 0 0 0 currentColor;
+          opacity: 0.8;
+        }
+        50% {
+          box-shadow: 0 0 0 4px currentColor;
+          opacity: 0;
+        }
+        100% {
+          box-shadow: 0 0 0 0 currentColor;
+          opacity: 0;
+        }
+      }
+      .live-dot::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        animation: liveRing 1.5s ease-in-out infinite;
+      }
+
+      /* ── Row hover: bg only, no layout shift ── */
+      .row-hover { transition: background 0.15s ease; }
+      .row-hover:hover { background: rgba(255,255,255,0.03); }
+
+      /* ── Quick action row ── */
+      .action-row { transition: background 0.15s ease, border-color 0.15s ease; }
+      .action-row:hover { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.08) !important; }
+
+      .glass-panel {
+        background: rgba(13, 21, 38, 0.6);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+      }
+      .shimmer-btn {
+        position: relative;
+        overflow: hidden;
+      }
+      .shimmer-btn::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(45deg, transparent, rgba(192,193,255,0.1), transparent);
+        transform: rotate(45deg);
+        transition: 0.5s;
+      }
+      .shimmer-btn:hover::after {
+        left: 100%;
+        top: 100%;
+      }
+
+      .sidebar-link { transition: all 0.15s ease; }
+      .active-link { background: linear-gradient(90deg, rgba(192,193,255,0.12), rgba(192,193,255,0.04)); }
+    </style>
+  </head>
+  <body class="bg-white dark:bg-background font-body text-gray-900 dark:text-on-surface-variant antialiased no-scrollbar transition-colors duration-200">
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
