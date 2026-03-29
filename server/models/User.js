@@ -11,6 +11,8 @@ const User = sequelize.define('User', {
   aiApiKey:       { type: DataTypes.STRING },
   aiModel:        { type: DataTypes.STRING },
   latestResumeId: { type: DataTypes.UUID, allowNull: true },
+  resetOtp:        { type: DataTypes.STRING, allowNull: true },
+  resetOtpExpiry:  { type: DataTypes.BIGINT, allowNull: true },
 }, {
   hooks: {
     beforeCreate: async (user) => {

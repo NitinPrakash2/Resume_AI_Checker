@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
-import { getMe, updateSettings, testApiKey, changePassword } from '../services/resumeService'
+import { Link } from 'react-router-dom'
+import { getMe, updateSettings, testApiKey, changePassword, forgotPassword, verifyOtp, resetPassword } from '../services/resumeService'
 
 const PROVIDERS = [
   {
@@ -110,6 +111,20 @@ export default function Settings() {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false)
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+
+  // Forgot / reset password (OTP flow)
+  const [fpOpen, setFpOpen]           = useState(false)
+  const [fpStep, setFpStep]           = useState(1)
+  const [fpEmail, setFpEmail]         = useState('')
+  const [fpOtp, setFpOtp]             = useState('')
+  const [fpResetToken, setFpResetToken] = useState('')
+  const [fpNewPass, setFpNewPass]     = useState('')
+  const [fpConfirm, setFpConfirm]     = useState('')
+  const [fpLoading, setFpLoading]     = useState(false)
+  const [fpError, setFpError]         = useState('')
+  const [fpSuccess, setFpSuccess]     = useState('')
+  const [fpNotReg, setFpNotReg]       = useState(false)
+  const [fpCooldown, setFpCooldown]   = useState(0)
 
   // Section Refs
   const profileRef = useRef(null)
@@ -301,6 +316,56 @@ export default function Settings() {
     } finally {
       setChangingPassword(false)
     }
+  }
+
+  const fpStartCooldown = () => {
+    setFpCooldown(60)
+    const t = setInterval(() => {
+      setFpCooldown(s => { if (s <= 1) { clearInterval(t); return 0 } return s - 1 })
+    }, 1000)
+  }
+
+  const handleFpSendOtp = async (e) => {
+    e?.preventDefault()
+    setFpError(''); setFpNotReg(false)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(fpEmail)) { setFpError('Please enter a valid email address (e.g. name@mail.com)'); return }
+    setFpLoading(true)
+    try {
+      await forgotPassword(fpEmail)
+      setFpStep(2); fpStartCooldown()
+    } catch (err) {
+      if (err.response?.data?.notRegistered) setFpNotReg(true)
+      else setFpError(err.response?.data?.error || 'Failed to send OTP')
+    } finally { setFpLoading(false) }
+  }
+
+  const handleFpVerifyOtp = async (e) => {
+    e.preventDefault()
+    setFpError(''); setFpLoading(true)
+    try {
+      const data = await verifyOtp(fpEmail, fpOtp)
+      setFpResetToken(data.resetToken); setFpStep(3)
+    } catch (err) {
+      setFpError(err.response?.data?.error || 'Invalid OTP')
+    } finally { setFpLoading(false) }
+  }
+
+  const handleFpReset = async (e) => {
+    e.preventDefault()
+    setFpError(''); setFpLoading(true)
+    try {
+      await resetPassword(fpResetToken, fpNewPass, fpConfirm)
+      setFpSuccess('Password reset successfully! You can now sign in with your new password.')
+    } catch (err) {
+      setFpError(err.response?.data?.error || 'Reset failed')
+    } finally { setFpLoading(false) }
+  }
+
+  const resetFpFlow = () => {
+    setFpOpen(false); setFpStep(1); setFpEmail(''); setFpOtp('')
+    setFpResetToken(''); setFpNewPass(''); setFpConfirm('')
+    setFpError(''); setFpSuccess(''); setFpNotReg(false); setFpCooldown(0)
   }
 
   const selected = PROVIDERS.find(p => p.id === activeProvider) || PROVIDERS[0]

@@ -70,6 +70,22 @@ export const changePassword = async (currentPassword, newPassword, confirmPasswo
   return data
 }
 
+export const forgotPassword = async (email) => {
+  const res = await api.post('/auth/forgot-password', { email }, { validateStatus: () => true })
+  if (res.status !== 200) throw { response: res }
+  return res.data
+}
+
+export const verifyOtp = async (email, otp) => {
+  const { data } = await api.post('/auth/verify-otp', { email, otp })
+  return data
+}
+
+export const resetPassword = async (resetToken, newPassword, confirmPassword) => {
+  const { data } = await api.post('/auth/reset-password', { resetToken, newPassword, confirmPassword })
+  return data
+}
+
 // Store latest resume id in DB (via user record), not localStorage
 export const uploadResume = async (file, jobDesc) => {
   const formData = new FormData()
