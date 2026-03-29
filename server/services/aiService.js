@@ -8,7 +8,8 @@ const PROVIDERS = { openrouter, gemini, groq, grok }
 async function call(fnName, provider, apiKey, model, ...args) {
   const service = PROVIDERS[provider] || openrouter
 
-  if (!apiKey && !process.env.OPENROUTER_API_KEY && !process.env.GROQ_API_KEY) {
+  if (!apiKey && !process.env.OPENROUTER_API_KEY && !process.env.GROQ_API_KEY &&
+      !process.env.GEMINI_API_KEY && !process.env.GROK_API_KEY) {
     throw new Error('No API key configured. Please add your API key in Settings.')
   }
 
@@ -22,7 +23,9 @@ async function call(fnName, provider, apiKey, model, ...args) {
       throw new Error(`Invalid API key for ${provider}. Please check your key in Settings.`)
     }
 
-    if (isQuota && !apiKey && process.env.GROQ_API_KEY && process.env.GROQ_API_KEY !== 'your_groq_api_key') {
+    // Fallback to Groq only if quota hit on a different provider and no user key
+    if (isQuota && !apiKey && provider !== 'groq' &&
+        process.env.GROQ_API_KEY && process.env.GROQ_API_KEY !== 'your_groq_api_key') {
       return await groq[fnName](...args, null, null)
     }
 

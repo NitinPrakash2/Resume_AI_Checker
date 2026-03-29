@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getBenchmarkResumes, analyzeBenchmark, getLatestResumeId } from '../services/resumeService'
+import { getBenchmarkResumes, getLatestResumeId } from '../services/resumeService'
+import { useBenchmark } from '../context/BenchmarkContext'
 import {
   TrendingUp, Award, AlertCircle, Lightbulb, Users, Briefcase,
   Loader2, RefreshCw, ExternalLink, Zap, MapPin, DollarSign,
@@ -53,13 +54,10 @@ const LOADING_STEPS = [
 
 export default function Benchmark() {
   const navigate = useNavigate()
+  const { loading, loadingStep, result, error, run } = useBenchmark()
   const [resumes, setResumes] = useState([])
   const [selectedResume, setSelectedResume] = useState(null)
-  const [loading, setLoading] = useState(false)
   const [loadingResumes, setLoadingResumes] = useState(true)
-  const [loadingStep, setLoadingStep] = useState(0)
-  const [result, setResult] = useState(null)
-  const [error, setError] = useState('')
   const [dropdownOpen, setDropdownOpen] = useState(false)
 
   useEffect(() => { loadResumes() }, [])
@@ -73,26 +71,8 @@ export default function Benchmark() {
         const active = latestId ? data.find(r => r.id === latestId) : null
         setSelectedResume(active || data[0])
       }
-    } catch { setError('Failed to load resumes') }
+    } catch { /* ignore */ }
     finally { setLoadingResumes(false) }
-  }
-
-  const handleAnalyze = async () => {
-    if (!selectedResume) return
-    setLoading(true)
-    setError('')
-    setResult(null)
-    setLoadingStep(0)
-    const iv = setInterval(() => setLoadingStep(s => Math.min(s + 1, LOADING_STEPS.length - 1)), 4000)
-    try {
-      const data = await analyzeBenchmark(selectedResume.id)
-      setResult(data)
-    } catch (err) {
-      setError(err.response?.data?.error || err.message || 'Analysis failed')
-    } finally {
-      clearInterval(iv)
-      setLoading(false)
-    }
   }
 
   const tier = result ? (TIER_STYLES[result.ranking?.tier] || TIER_STYLES['Average']) : null
@@ -185,7 +165,7 @@ export default function Benchmark() {
         )}
 
         <button
-          onClick={handleAnalyze}
+          onClick={() => run(selectedResume)}
           disabled={loading || !selectedResume || resumes.length === 0}
           className="mt-4 w-full py-3 sm:py-4 bg-gradient-to-r from-primary to-primary-container text-[#0b1120] text-xs sm:text-sm font-bold rounded-xl hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 shadow-lg"
         >
@@ -435,7 +415,7 @@ export default function Benchmark() {
 
           {/* Re-run */}
           <button
-            onClick={handleAnalyze}
+            onClick={() => run(selectedResume)}
             disabled={loading}
             className="w-full py-3 border-2 border-gray-300 dark:border-white/10 rounded-xl text-sm font-bold text-gray-700 dark:text-[#6b7a94] hover:border-primary hover:text-primary dark:hover:text-primary transition-all flex items-center justify-center gap-2"
           >

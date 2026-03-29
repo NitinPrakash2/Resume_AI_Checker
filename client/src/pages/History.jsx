@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getHistory, deleteResume, getLatestResumeId, setLatestResumeId } from '../services/resumeService'
+import { getHistory, deleteResume } from '../services/resumeService'
 import ConfirmDialog from '../components/ConfirmDialog'
 
 function Skeleton({ className = '' }) {
@@ -14,13 +14,51 @@ function ScoreBadge({ score }) {
   return <span className={`px-2 py-0.5 rounded-lg border text-xs font-bold ${color}`}>{score}%</span>
 }
 
+function HistoryRow({ r, deleting, onNavigate, onDeleteClick }) {
+  const handleRowClick = () => onNavigate(r.id)
+  const handleDelete   = (e) => onDeleteClick(e, r.id, r.fileName)
+  return (
+    <div
+      onClick={handleRowClick}
+      className="grid grid-cols-5 items-center px-5 py-4 hover:bg-gray-50 dark:hover:bg-white/[0.04] cursor-pointer transition-all group hover:shadow-md"
+    >
+      <div className="col-span-2 flex items-center gap-3">
+        <div className="w-8 h-8 bg-primary/10 rounded-xl flex items-center justify-center text-primary flex-shrink-0">
+          <span className="material-symbols-outlined text-sm">description</span>
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-bold text-gray-900 dark:text-[#dae2fd] truncate">{r.fileName}</p>
+          </div>
+          <p className="text-[10px] text-gray-600 dark:text-[#8892a4] font-medium">{new Date(r.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+        </div>
+      </div>
+      <div className="flex justify-center"><ScoreBadge score={r.score || 0} /></div>
+      <div className="flex justify-center"><ScoreBadge score={r.atsScore || 0} /></div>
+      <div className="flex justify-center gap-2">
+        <button
+          onClick={handleDelete}
+          disabled={deleting === r.id}
+          className="w-7 h-7 flex items-center justify-center rounded-xl bg-gray-100 dark:bg-white/5 hover:bg-red-400/15 text-gray-600 dark:text-[#8892a4] hover:text-red-400 transition-all disabled:opacity-50"
+          title="Delete resume"
+        >
+          {deleting === r.id ? (
+            <span className="material-symbols-outlined text-sm animate-spin">progress_activity</span>
+          ) : (
+            <span className="material-symbols-outlined text-sm">delete</span>
+          )}
+        </button>
+      </div>
+    </div>
+  )
+}
+
 export default function History() {
   const navigate = useNavigate()
   const [history, setHistory] = useState([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [deleting, setDeleting] = useState(null)
-  const [activeResumeId, setActiveResumeId] = useState(null)
   const [confirmDialog, setConfirmDialog] = useState(null) // { id, fileName }
 
   const loadHistory = () => {
@@ -29,7 +67,6 @@ export default function History() {
 
   useEffect(() => {
     loadHistory()
-    getLatestResumeId().then(setActiveResumeId).catch(console.error)
   }, [])
 
   const handleDeleteClick = (e, id, fileName) => {
@@ -44,7 +81,6 @@ export default function History() {
     try {
       await deleteResume(id)
       setHistory(h => h.filter(r => r.id !== id))
-      if (activeResumeId === id) setActiveResumeId(null)
     } catch {
       // silently fail — no alert popup
     } finally {
@@ -52,17 +88,9 @@ export default function History() {
     }
   }
 
-  const handleSetActive = async (e, id) => {
-    e.stopPropagation()
-    try {
-      await setLatestResumeId(id)
-      setActiveResumeId(id)
-    } catch {
-      // silently fail
-    }
-  }
+  const handleNavigate = useCallback((id) => navigate(`/result/${id}`), [navigate])
 
-  const filtered = history.filter(r => r.fileName.toLowerCase().includes(search.toLowerCase()))
+const filtered = history.filter(r => r.fileName.toLowerCase().includes(search.toLowerCase()))
 
   return (
     <div className="space-y-6 animate-fade-up">
@@ -104,51 +132,13 @@ export default function History() {
         ) : (
           <div className="divide-y divide-gray-200 dark:divide-white/5">
             {filtered.map((r) => (
-              <div
+              <HistoryRow
                 key={r.id}
-                onClick={() => navigate(`/result/${r.id}`)}
-                className="grid grid-cols-5 items-center px-5 py-4 hover:bg-gray-50 dark:hover:bg-white/[0.04] cursor-pointer transition-all group hover:shadow-md"
-              >
-                <div className="col-span-2 flex items-center gap-3">
-                  <div className="w-8 h-8 bg-primary/10 rounded-xl flex items-center justify-center text-primary flex-shrink-0">
-                    <span className="material-symbols-outlined text-sm">description</span>
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-bold text-gray-900 dark:text-[#dae2fd] truncate">{r.fileName}</p>
-                      {activeResumeId === r.id && (
-                        <span className="px-1.5 py-0.5 bg-green-500/10 border border-green-500/20 text-green-400 text-[9px] font-bold rounded">ACTIVE</span>
-                      )}
-                    </div>
-                    <p className="text-[10px] text-gray-600 dark:text-[#8892a4] font-medium">{new Date(r.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
-                  </div>
-                </div>
-                <div className="flex justify-center"><ScoreBadge score={r.score || 0} /></div>
-                <div className="flex justify-center"><ScoreBadge score={r.atsScore || 0} /></div>
-                <div className="flex justify-center gap-2">
-                  {activeResumeId !== r.id && (
-                    <button
-                      onClick={(e) => handleSetActive(e, r.id)}
-                      className="w-7 h-7 flex items-center justify-center rounded-xl bg-gray-100 dark:bg-white/5 hover:bg-green-500/15 text-gray-600 dark:text-[#8892a4] hover:text-green-400 transition-all"
-                      title="Set as active resume"
-                    >
-                      <span className="material-symbols-outlined text-sm">check_circle</span>
-                    </button>
-                  )}
-                  <button
-                    onClick={(e) => handleDeleteClick(e, r.id, r.fileName)}
-                    disabled={deleting === r.id}
-                    className="w-7 h-7 flex items-center justify-center rounded-xl bg-gray-100 dark:bg-white/5 hover:bg-red-400/15 text-gray-600 dark:text-[#8892a4] hover:text-red-400 transition-all disabled:opacity-50"
-                    title="Delete resume"
-                  >
-                    {deleting === r.id ? (
-                      <span className="material-symbols-outlined text-sm animate-spin">progress_activity</span>
-                    ) : (
-                      <span className="material-symbols-outlined text-sm">delete</span>
-                    )}
-                  </button>
-                </div>
-              </div>
+                r={r}
+                deleting={deleting}
+                onNavigate={handleNavigate}
+                onDeleteClick={handleDeleteClick}
+              />
             ))}
           </div>
         )}

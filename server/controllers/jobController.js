@@ -42,7 +42,8 @@ const deleteJob = async (req, res, next) => {
 const searchAndMatch = async (req, res, next) => {
   try {
     const { q = '', location = '', resumeId, page = 1 } = req.query
-    const jobs = await searchJobs({ keywords: q, location, page: Number(page) })
+    const safePage = Math.min(10, Math.max(1, parseInt(page, 10) || 1))
+    const jobs = await searchJobs({ keywords: q, location, page: safePage })
 
     if (resumeId) {
       const resume = await Resume.findByPk(resumeId, { attributes: ['keywords', 'missing'] })
@@ -63,7 +64,10 @@ const searchAndMatch = async (req, res, next) => {
 
 const getAISuggestedJobs = async (req, res, next) => {
   try {
-    const resume = await Resume.findByPk(req.params.resumeId, { attributes: ['id', 'keywords', 'rawText', 'userId'] })
+    const resume = await Resume.findOne({
+      where: { id: req.params.resumeId, userId: req.user.id },
+      attributes: ['id', 'keywords', 'rawText'],
+    })
     if (!resume) return res.status(404).json({ error: 'Resume not found' })
 
     let keywords = resume.keywords || []

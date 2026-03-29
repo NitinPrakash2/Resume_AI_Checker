@@ -6,9 +6,21 @@ const Resume   = require('../models/Resume')
 const User     = require('../models/User')
 const ai       = require('../services/aiService')
 
+const UPLOADS_DIR = path.resolve(__dirname, '..', 'uploads')
+
+const ALLOWED_EXTS = new Set(['.pdf', '.doc', '.docx'])
+
 async function extractText(filePath, originalName) {
-  const ext    = path.extname(originalName).toLowerCase()
-  const buffer = fs.readFileSync(filePath)
+  // Resolve and confirm the file is inside the uploads directory (CWE-22/23)
+  const resolved = path.resolve(filePath)
+  if (!resolved.startsWith(UPLOADS_DIR + path.sep))
+    throw new Error('Invalid file path')
+
+  // Validate extension against an explicit allowlist using only the basename
+  const ext = path.extname(path.basename(originalName)).toLowerCase()
+  if (!ALLOWED_EXTS.has(ext)) throw new Error('Unsupported file type')
+
+  const buffer = fs.readFileSync(resolved)
   if (ext === '.pdf') {
     const _warn = console.warn, _error = console.error, _log = console.log
     console.warn = console.error = console.log = () => {}
@@ -23,17 +35,28 @@ async function extractText(filePath, originalName) {
   throw new Error('Unsupported file type')
 }
 
+// Safely delete a file only if it resolves within the uploads directory (CWE-22/23)
+function safeUnlink(filePath) {
+  try {
+    const resolved = path.resolve(filePath)
+    if (!resolved.startsWith(UPLOADS_DIR + path.sep)) return
+    if (fs.existsSync(resolved)) fs.unlinkSync(resolved)
+  } catch { /* ignore cleanup errors */ }
+}
+
 async function getAICfg(req) {
-  const headerKey = req.headers['x-ai-key']
-  if (headerKey) {
-    return { provider: req.headers['x-ai-provider'] || 'openrouter', apiKey: headerKey, model: req.headers['x-ai-model'] || '' }
-  }
+  // Logged-in users: always read AI config from DB
   if (req.user?.id) {
     const user = await User.findByPk(req.user.id, { attributes: ['aiProvider', 'aiApiKey', 'aiModel'] })
-    if (user?.aiApiKey) return { provider: user.aiProvider, apiKey: user.aiApiKey, model: user.aiModel }
-    if (user?.aiProvider) return { provider: user.aiProvider, apiKey: null, model: user.aiModel }
+    if (user?.aiApiKey) return { provider: user.aiProvider || 'openrouter', apiKey: user.aiApiKey, model: user.aiModel || '' }
+    return { provider: user?.aiProvider || 'openrouter', apiKey: null, model: user?.aiModel || '' }
   }
-  return { provider: req.headers['x-ai-provider'] || 'openrouter', apiKey: null, model: req.headers['x-ai-model'] || '' }
+  // Guest users: read from request headers (sent from localStorage)
+  return {
+    provider: req.headers['x-ai-provider'] || 'openrouter',
+    apiKey:   req.headers['x-ai-key']      || null,
+    model:    req.headers['x-ai-model']    || ''
+  }
 }
 
 const uploadResume = async (req, res, next) => {
@@ -68,10 +91,10 @@ const uploadResume = async (req, res, next) => {
     if (req.user?.id) {
       await User.update({ latestResumeId: resume.id }, { where: { id: req.user.id } })
     }
-    fs.unlinkSync(req.file.path)
+    safeUnlink(req.file.path)
     res.json({ id: resume.id, savedToDb: true })
   } catch (err) {
-    if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path)
+    if (req.file) safeUnlink(req.file.path)
     next(err)
   }
 }
@@ -80,6 +103,8 @@ const getResult = async (req, res, next) => {
   try {
     const resume = await Resume.findByPk(req.params.id)
     if (!resume) return res.status(404).json({ error: 'Not found' })
+    if (req.user?.id && resume.userId && resume.userId !== req.user.id)
+      return res.status(403).json({ error: 'Access denied' })
     res.json(resume)
   } catch (err) { next(err) }
 }

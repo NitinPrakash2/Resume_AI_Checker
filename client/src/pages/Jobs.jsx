@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { getJobs, createJob, updateJob, deleteJob, searchJobs, getLatestResumeId, getHistory } from '../services/resumeService'
+import { useNavigate } from 'react-router-dom'
+import { getJobs, createJob, updateJob, deleteJob, searchJobs, getHistory, getAISuggestedJobs } from '../services/resumeService'
 import ConfirmDialog from '../components/ConfirmDialog'
 
 const STATUS = {
@@ -149,6 +150,7 @@ function Toast({ toasts }) {
 }
 
 export default function Jobs() {
+  const navigate = useNavigate()
   const [jobs, setJobs] = useState([])
   const [loading, setLoading] = useState(true)
   const [modal, setModal] = useState(null)
@@ -157,6 +159,9 @@ export default function Jobs() {
   const [search, setSearch] = useState('')
   const [matchedJobs, setMatchedJobs] = useState([])
   const [loadingMatches, setLoadingMatches] = useState(false)
+  const [resumeHistory, setResumeHistory] = useState([])
+  const [selectedResumeId, setSelectedResumeId] = useState(null)
+  const [pickerOpen, setPickerOpen] = useState(false)
   const [viewMode, setViewMode] = useState('ai')
   const [manualSearch, setManualSearch] = useState('')
   const [manualLocation, setManualLocation] = useState('')
@@ -179,15 +184,34 @@ export default function Jobs() {
 
   const load = () => getJobs().then(setJobs).catch(console.error).finally(() => setLoading(false))
 
-  const loadMatchedJobs = async () => {
+  const loadMatchedJobs = async (resumeId) => {
     setLoadingMatches(true)
     try {
-      setMatchedJobs([])
+      const data = await getAISuggestedJobs(resumeId)
+      setMatchedJobs(data || [])
     } catch {
       setMatchedJobs([])
     } finally {
       setLoadingMatches(false)
     }
+  }
+
+  // Load history and auto-select most recent resume
+  const checkAndReload = async () => {
+    try {
+      const history = await getHistory()
+      setResumeHistory(history || [])
+      if (history?.length > 0 && !selectedResumeId) {
+        setSelectedResumeId(history[0].id)
+        loadMatchedJobs(history[0].id)
+      }
+    } catch {}
+  }
+
+  const handleResumeSelect = (resumeId) => {
+    setSelectedResumeId(resumeId)
+    setMatchedJobs([])
+    if (resumeId) loadMatchedJobs(resumeId)
   }
 
   const handleManualSearch = async () => {
@@ -228,9 +252,9 @@ export default function Jobs() {
     }
   }
   
-  useEffect(() => { 
+  useEffect(() => {
     load()
-    loadMatchedJobs()
+    checkAndReload()
   }, [])
 
   const handleSave = async (form) => {
@@ -286,7 +310,7 @@ export default function Jobs() {
           </div>
           <div className="flex flex-wrap gap-2">
             {viewMode === 'ai' && (
-              <button onClick={loadMatchedJobs} disabled={loadingMatches} className="px-3 py-1.5 text-xs font-bold rounded-xl transition-all bg-white/50 dark:bg-white/5 text-gray-700 dark:text-[#8892a4] hover:bg-white/80 dark:hover:bg-white/10 disabled:opacity-50">
+              <button onClick={() => selectedResumeId && loadMatchedJobs(selectedResumeId)} disabled={loadingMatches || !selectedResumeId} className="px-3 py-1.5 text-xs font-bold rounded-xl transition-all bg-white/50 dark:bg-white/5 text-gray-700 dark:text-[#8892a4] hover:bg-white/80 dark:hover:bg-white/10 disabled:opacity-50">
                 <span className="flex items-center gap-1"><span className="material-symbols-outlined text-sm">refresh</span>Refresh</span>
               </button>
             )}
@@ -305,6 +329,61 @@ export default function Jobs() {
 
         {viewMode === 'ai' ? (
           <>
+            {/* Resume Picker — Benchmark style */}
+            {resumeHistory.length > 0 && (
+              <div className="mb-4 bg-white dark:bg-[#0d1526] border-2 border-gray-200 dark:border-white/[0.07] rounded-xl p-3 shadow-sm">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="material-symbols-outlined text-sm text-primary">description</span>
+                  <span className="text-xs font-bold text-gray-900 dark:text-[#dae2fd]">Select Resume for Job Matches</span>
+                </div>
+                <div className="space-y-2">
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setPickerOpen(o => !o)}
+                      className="w-full px-4 py-2.5 bg-gray-50 dark:bg-white/5 border-2 border-gray-300 dark:border-white/10 rounded-xl text-xs font-semibold text-gray-900 dark:text-[#dae2fd] focus:outline-none focus:border-primary transition-all text-left flex items-center justify-between"
+                    >
+                      <span className="truncate">
+                        {selectedResumeId
+                          ? resumeHistory.find(r => r.id === selectedResumeId)?.fileName || 'Select a resume'
+                          : 'Select a resume'}
+                      </span>
+                      <span className={`material-symbols-outlined text-sm flex-shrink-0 ml-2 transition-transform ${pickerOpen ? 'rotate-180' : ''}`}>expand_more</span>
+                    </button>
+                    {pickerOpen && (
+                      <div className="absolute z-50 w-full mt-1 bg-white dark:bg-[#0d1526] border-2 border-gray-300 dark:border-white/10 rounded-xl shadow-lg max-h-52 overflow-y-auto">
+                        {resumeHistory.map(r => (
+                          <button
+                            key={r.id}
+                            type="button"
+                            onClick={() => { handleResumeSelect(r.id); setPickerOpen(false) }}
+                            className={`w-full px-4 py-2.5 text-left text-xs font-medium transition-colors flex items-center justify-between gap-2 ${
+                              selectedResumeId === r.id
+                                ? 'bg-primary/10 text-primary'
+                                : 'text-gray-800 dark:text-[#dae2fd] hover:bg-gray-100 dark:hover:bg-white/5'
+                            }`}
+                          >
+                            <span className="truncate">{r.fileName}</span>
+                            <span className="text-[10px] text-gray-400 dark:text-[#3d4a5c] flex-shrink-0">{new Date(r.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  {selectedResumeId && (() => {
+                    const r = resumeHistory.find(x => x.id === selectedResumeId)
+                    return r ? (
+                      <div className="flex flex-wrap items-center gap-2 px-3 py-2 bg-primary/5 border border-primary/20 rounded-xl text-xs">
+                        <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse flex-shrink-0" />
+                        <span className="font-bold text-gray-900 dark:text-[#dae2fd] truncate flex-1">{r.fileName}</span>
+                        {r.score && <span className="flex-shrink-0 font-semibold text-gray-500 dark:text-[#6b7a94]">· Score {r.score}/100</span>}
+
+                      </div>
+                    ) : null
+                  })()}
+                </div>
+              </div>
+            )}
             {loadingMatches ? (
               <div className="flex items-center gap-3 py-8 justify-center">
                 <span className="material-symbols-outlined text-blue-600 dark:text-primary animate-spin">progress_activity</span>
@@ -312,7 +391,7 @@ export default function Jobs() {
               </div>
             ) : matchedJobs.length > 0 ? (
               <>
-                <p className="text-xs text-gray-700 dark:text-[#8892a4] mb-4 font-medium">Based on your latest resume, here are {matchedJobs.length} jobs that match your skills</p>
+                <p className="text-xs text-gray-700 dark:text-[#8892a4] mb-4 font-medium">Based on <span className="font-bold text-gray-900 dark:text-[#dae2fd]">{resumeHistory.find(r => r.id === selectedResumeId)?.fileName || 'your resume'}</span>, here are {matchedJobs.length} jobs that match your skills</p>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                   {matchedJobs.map((job, idx) => (
                     <div key={idx} className="bg-white dark:bg-[#0f1829] border border-gray-200 dark:border-white/8 rounded-xl p-4 hover:border-blue-600/30 dark:hover:border-primary/30 transition-all group hover:shadow-lg">
@@ -371,11 +450,16 @@ export default function Jobs() {
             ) : (
               <div className="flex flex-col items-center justify-center py-12 text-center">
                 <span className="material-symbols-outlined text-4xl text-gray-400 dark:text-[#3d4a5c] mb-3">upload_file</span>
-                <p className="text-sm font-bold text-gray-900 dark:text-[#dae2fd] mb-1">No resume uploaded yet</p>
-                <p className="text-xs text-gray-600 dark:text-[#8892a4] mb-4 font-medium">Upload a resume to get AI-powered job suggestions matched to your skills</p>
-                <button onClick={() => window.location.href = '/upload'} className="px-4 py-2 bg-blue-600/10 dark:bg-primary/10 border border-blue-600/20 dark:border-primary/20 text-blue-600 dark:text-primary text-xs font-bold rounded-xl hover:bg-blue-600/20 dark:hover:bg-primary/20 transition-all shadow-sm hover:shadow-md">
-                  Upload Resume
-                </button>
+                <p className="text-sm font-bold text-gray-900 dark:text-[#dae2fd] mb-1">No active resume selected</p>
+                <p className="text-xs text-gray-600 dark:text-[#8892a4] mb-4 font-medium">Upload a new resume or set one as active from History to get AI-powered job suggestions</p>
+                <div className="flex gap-2">
+                  <button onClick={() => navigate('/upload')} className="px-4 py-2 bg-blue-600/10 dark:bg-primary/10 border border-blue-600/20 dark:border-primary/20 text-blue-600 dark:text-primary text-xs font-bold rounded-xl hover:bg-blue-600/20 dark:hover:bg-primary/20 transition-all">
+                    Upload Resume
+                  </button>
+                  <button onClick={() => navigate('/history')} className="px-4 py-2 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-700 dark:text-[#8892a4] text-xs font-bold rounded-xl hover:bg-gray-200 dark:hover:bg-white/10 transition-all">
+                    Go to History
+                  </button>
+                </div>
               </div>
             )}
           </>

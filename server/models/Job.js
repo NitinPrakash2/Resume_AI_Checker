@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize')
-const { sequelize } = require('../config/db')
+const { getSequelize } = require('../config/db')
 
-const Job = sequelize.define('Job', {
+const Job = getSequelize().define('Job', {
   id:      { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
   userId:  { type: DataTypes.UUID, allowNull: true },
   title:   { type: DataTypes.STRING, allowNull: false },

@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { getMe, updateSettings, testApiKey, changePassword, forgotPassword, verifyOtp, resetPassword } from '../services/resumeService'
+import { getMe, updateSettings, testApiKey, changePassword, forgotPassword, verifyOtp, resetPassword, getSavedKeys, saveApiKey, deleteSavedKey } from '../services/resumeService'
 
 const PROVIDERS = [
   {
@@ -102,6 +102,11 @@ export default function Settings() {
   const [testing, setTesting]               = useState(false)
   const [testResult, setTestResult]         = useState(null)
   const [savedKeys, setSavedKeys]           = useState({})
+  const [keyHistory, setKeyHistory]         = useState([])
+  const [keyLabel, setKeyLabel]             = useState('')
+  const [savingToHistory, setSavingToHistory] = useState(false)
+  const [deletingKeyId, setDeletingKeyId]   = useState(null)
+  const [switchedKey, setSwitchedKey]       = useState(null)
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -135,15 +140,14 @@ export default function Settings() {
   const isLoggedIn = !!(sessionStorage.getItem('token'))
 
   useEffect(() => {
-    if (!isLoggedIn) { 
+    if (!isLoggedIn) {
+      // Guest: load from localStorage only
       const local    = loadLocalKeys()
       const provider = localStorage.getItem(LS_PROVIDER) || 'openrouter'
       const model    = localStorage.getItem(LS_MODEL)    || ''
-
       setActiveProvider(provider)
       setActiveModel(model)
       setApiKey(local[provider] || '')
-
       const saved = {}
       PROVIDERS.forEach(p => { saved[p.id] = !!local[p.id] })
       setSavedKeys(saved)
@@ -151,32 +155,22 @@ export default function Settings() {
       return
     }
 
-    getMe()
-      .then(u => {
+    Promise.all([getMe(), getSavedKeys().catch(() => [])])
+      .then(([u, keys]) => {
         setUser(u)
         setName(u.name || '')
-        
         const provider = u.aiProvider || 'openrouter'
-        const model = u.aiModel || ''
-        const key = u.aiApiKey || ''
-        
+        const model    = u.aiModel    || ''
+        const key      = u.aiApiKey   || ''
         setActiveProvider(provider)
         setActiveModel(model)
-        
-        if (key) {
-          setApiKey(key)
-        } else {
-          const local = loadLocalKeys()
-          setApiKey(local[provider] || '')
-        }
-        
+        setApiKey(key)
         const saved = {}
-        PROVIDERS.forEach(p => { saved[p.id] = (p.id === provider && (key || loadLocalKeys()[p.id])) })
+        PROVIDERS.forEach(p => { saved[p.id] = (p.id === provider && !!key) })
         setSavedKeys(saved)
+        setKeyHistory(keys)
       })
-      .catch(err => {
-        console.error('Failed to load user:', err)
-      })
+      .catch(err => console.error('Failed to load user:', err))
       .finally(() => setLoading(false))
   }, [])
 
@@ -185,14 +179,9 @@ export default function Settings() {
     setActiveModel('')
     setTestResult(null)
     setShowKey(false)
-    
     if (isLoggedIn) {
-      if (user?.aiProvider === id && user?.aiApiKey) {
-        setApiKey(user.aiApiKey)
-      } else {
-        const local = loadLocalKeys()
-        setApiKey(local[id] || '')
-      }
+      // For logged-in users, key comes from DB (loaded on mount per provider)
+      setApiKey(user?.aiProvider === id ? (user?.aiApiKey || '') : '')
     } else {
       const local = loadLocalKeys()
       setApiKey(local[id] || '')
@@ -215,46 +204,85 @@ export default function Settings() {
   }
 
   const handleSaveApiKey = async () => {
-    if (!apiKey) {
-      alert('Please enter an API key')
-      return
-    }
-
+    if (!apiKey) { alert('Please enter an API key'); return }
     setSavingKey(true)
     try {
+      // Verify key works before saving — skip if already tested and passed
+      if (!testResult?.ok) {
+        setTesting(true)
+        try {
+          await testApiKey(activeProvider, apiKey, activeModel)
+          setTestResult({ ok: true, msg: 'Key is valid!' })
+        } catch (err) {
+          const msg = err.response?.data?.error || err.message || 'Invalid key'
+          setTestResult({ ok: false, msg })
+          setSavingKey(false)
+          setTesting(false)
+          return
+        } finally {
+          setTesting(false)
+        }
+      }
+
       if (isLoggedIn) {
-        // Save everything to DB — no localStorage needed
-        await updateSettings({ 
-          name, 
-          aiProvider: activeProvider, 
-          aiModel: activeModel, 
-          aiApiKey: apiKey 
-        })
-        setUser(prev => ({
-          ...prev,
-          aiProvider: activeProvider,
-          aiModel: activeModel,
-          aiApiKey: apiKey
-        }))
+        await updateSettings({ name, aiProvider: activeProvider, aiModel: activeModel, aiApiKey: apiKey })
+        setUser(prev => ({ ...prev, aiProvider: activeProvider, aiModel: activeModel, aiApiKey: apiKey }))
       } else {
-        // Guest fallback — localStorage only
-        localStorage.setItem('resumeai_provider', activeProvider)
-        localStorage.setItem('resumeai_model', activeModel)
+        localStorage.setItem(LS_PROVIDER, activeProvider)
+        localStorage.setItem(LS_MODEL, activeModel)
         const local = loadLocalKeys()
         local[activeProvider] = apiKey
-        localStorage.setItem('resumeai_api_keys', JSON.stringify(local))
+        localStorage.setItem(LS_KEYS, JSON.stringify(local))
       }
-      
       const updated = {}
       PROVIDERS.forEach(p => { updated[p.id] = (p.id === activeProvider && !!apiKey) })
       setSavedKeys(updated)
       setSavedKey(true)
       setTimeout(() => setSavedKey(false), 3000)
-    } catch (e) { 
+    } catch (e) {
       alert('Failed to save API key: ' + (e.response?.data?.error || e.message))
-    } finally { 
-      setSavingKey(false) 
+    } finally {
+      setSavingKey(false)
     }
+  }
+
+  const handleSaveToHistory = async () => {
+    if (!apiKey || !isLoggedIn) return
+    setSavingToHistory(true)
+    try {
+      const newKey = await saveApiKey(keyLabel || activeProvider, activeProvider, apiKey, activeModel)
+      setKeyHistory(prev => [...prev, newKey])
+      setKeyLabel('')
+    } catch (e) {
+      alert(e.response?.data?.error || 'Failed to save key')
+    } finally {
+      setSavingToHistory(false)
+    }
+  }
+
+  const handleSwitchKey = async (k) => {
+    setActiveProvider(k.provider)
+    setActiveModel(k.model || '')
+    setApiKey(k.apiKey)
+    setTestResult(null)
+    setSwitchedKey(k.id)
+    try {
+      await updateSettings({ name, aiProvider: k.provider, aiModel: k.model || '', aiApiKey: k.apiKey })
+      const updated = {}
+      PROVIDERS.forEach(p => { updated[p.id] = (p.id === k.provider) })
+      setSavedKeys(updated)
+      setUser(prev => ({ ...prev, aiProvider: k.provider, aiModel: k.model || '', aiApiKey: k.apiKey }))
+    } catch {}
+    setTimeout(() => setSwitchedKey(null), 2000)
+  }
+
+  const handleDeleteHistoryKey = async (keyId) => {
+    setDeletingKeyId(keyId)
+    try {
+      await deleteSavedKey(keyId)
+      setKeyHistory(prev => prev.filter(k => k.id !== keyId))
+    } catch {}
+    finally { setDeletingKeyId(null) }
   }
 
   const handleSave = async () => {
@@ -369,6 +397,11 @@ export default function Settings() {
   }
 
   const selected = PROVIDERS.find(p => p.id === activeProvider) || PROVIDERS[0]
+
+  const isKeyActive = isLoggedIn
+    ? !!(user?.aiApiKey && user.aiApiKey === apiKey && user.aiProvider === activeProvider)
+    : (() => { const local = loadLocalKeys(); return local[activeProvider] === apiKey && !!apiKey })()
+
 
   if (loading) return (
     <div className="flex items-center justify-center h-64 text-[#A6ADFF]">
@@ -712,24 +745,133 @@ export default function Settings() {
               </select>
             </div>
 
-            {/* Save Key Button */}
-            <button
-              onClick={handleSaveApiKey}
-              disabled={savingKey || !apiKey}
-              className="bg-[#B4B9FF] text-[#0B0F19] font-bold text-[14px] px-8 py-3.5 rounded-xl flex items-center gap-2 hover:bg-[#9FA5FC] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {savingKey ? (
-                <><span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>Saving...</>
-              ) : savedKey ? (
-                <><span className="material-symbols-outlined text-[18px]">check_circle</span>Saved!</>
-              ) : savedKeys[activeProvider] ? (
-                <><span className="material-symbols-outlined text-[18px]">check_circle</span>Already Saved</>
-              ) : (
-                <><span>Save Configuration</span><span className="material-symbols-outlined text-[18px]">arrow_forward</span></>
+            {/* Save Key Buttons */}
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={handleSaveApiKey}
+                disabled={savingKey || testing || !apiKey || isKeyActive}
+                className="bg-[#B4B9FF] text-[#0B0F19] font-bold text-[14px] px-8 py-3.5 rounded-xl flex items-center gap-2 hover:bg-[#9FA5FC] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {savingKey && testing ? (
+                  <><span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>Verifying...</>
+                ) : savingKey ? (
+                  <><span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>Saving...</>
+                ) : isKeyActive ? (
+                  <><span className="material-symbols-outlined text-[18px]">check_circle</span>Active</>
+                ) : (
+                  <><span>Set as Active</span><span className="material-symbols-outlined text-[18px]">arrow_forward</span></>
+                )}
+              </button>
+              {isLoggedIn && (
+                <button
+                  onClick={handleSaveToHistory}
+                  disabled={savingToHistory || !apiKey}
+                  className="flex items-center gap-2 px-5 py-3.5 rounded-xl border-2 border-[#B4B9FF]/30 text-[#B4B9FF] text-[14px] font-bold hover:bg-[#B4B9FF]/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {savingToHistory
+                    ? <><span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>Saving...</>
+                    : <><span className="material-symbols-outlined text-[18px]">bookmark_add</span>Save to History</>}
+                </button>
               )}
-            </button>
+            </div>
           </div>
 
+          {/* ── Saved Key History ── */}
+          {isLoggedIn && (
+            <div className="bg-gray-50 dark:bg-[#161B2B] rounded-2xl border-2 border-gray-200 dark:border-slate-800/60 overflow-hidden">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-slate-800/60">
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-[#A6ADFF] text-[20px]">history</span>
+                  <span className="text-[15px] font-bold text-gray-900 dark:text-white">Saved API Keys</span>
+                  <span className="ml-1 px-2 py-0.5 bg-[#A6ADFF]/10 border border-[#A6ADFF]/20 text-[#A6ADFF] text-[11px] font-bold rounded-full">{keyHistory.length}</span>
+                </div>
+                <p className="text-[12px] text-gray-500 dark:text-slate-500 font-medium">Click any key to instantly switch</p>
+              </div>
+
+              {/* Label input — always visible */}
+              <div className="px-6 py-3 flex items-center gap-3 bg-white dark:bg-[#0D111C]/40 border-b border-gray-200 dark:border-slate-800/60">
+                <span className="material-symbols-outlined text-gray-400 dark:text-slate-500 text-[18px]">label</span>
+                <input
+                  value={keyLabel}
+                  onChange={e => setKeyLabel(e.target.value)}
+                  placeholder="Label for next key to save (optional)"
+                  className="flex-1 bg-transparent text-[13px] text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-600 outline-none font-medium"
+                />
+              </div>
+
+              {keyHistory.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-10 gap-2">
+                  <span className="material-symbols-outlined text-gray-300 dark:text-slate-700 text-[36px]">key_off</span>
+                  <p className="text-[13px] text-gray-500 dark:text-slate-500 font-medium">No saved keys yet — type a label above and click "Save to History"</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-gray-200 dark:divide-slate-800/60">
+                  {keyHistory.map(k => {
+                    const p = PROVIDERS.find(x => x.id === k.provider)
+                    const isActive = user?.aiApiKey === k.apiKey && user?.aiProvider === k.provider
+                    return (
+                      <div
+                        key={k.id}
+                        className={`flex items-center gap-4 px-6 py-4 transition-all group ${
+                          isActive
+                            ? 'bg-[#A6ADFF]/5 border-l-2 border-[#A6ADFF]'
+                            : 'hover:bg-white dark:hover:bg-white/[0.03] border-l-2 border-transparent'
+                        }`}
+                      >
+                        {/* Provider icon */}
+                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-[18px] flex-shrink-0 ${p?.bg || 'bg-white/5'} border ${p?.border || 'border-white/10'}`}>
+                          {p?.icon || '🔑'}
+                        </div>
+
+                        {/* Info */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <p className="text-[14px] font-bold text-gray-900 dark:text-white truncate">{k.label}</p>
+                            {isActive && (
+                              <span className="px-2 py-0.5 bg-green-500/10 border border-green-500/20 text-green-400 text-[10px] font-bold rounded-full">Active</span>
+                            )}
+                            {switchedKey === k.id && (
+                              <span className="px-2 py-0.5 bg-[#A6ADFF]/10 border border-[#A6ADFF]/20 text-[#A6ADFF] text-[10px] font-bold rounded-full">Switched!</span>
+                            )}
+                          </div>
+                          <p className="text-[12px] text-gray-500 dark:text-slate-500 font-medium mt-0.5">
+                            {p?.name || k.provider} {k.model ? `· ${k.model}` : ''} · {new Date(k.addedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                          </p>
+                        </div>
+
+                        {/* Masked key */}
+                        <span className="hidden sm:block text-[12px] font-mono text-gray-400 dark:text-slate-600 flex-shrink-0">
+                          {k.apiKey.slice(0, 6)}••••{k.apiKey.slice(-4)}
+                        </span>
+
+                        {/* Actions */}
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          {!isActive && (
+                            <button
+                              onClick={() => handleSwitchKey(k)}
+                              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#A6ADFF]/10 border border-[#A6ADFF]/20 text-[#A6ADFF] text-[12px] font-bold rounded-lg hover:bg-[#A6ADFF]/20 transition-all"
+                            >
+                              <span className="material-symbols-outlined text-[14px]">swap_horiz</span>
+                              Switch
+                            </button>
+                          )}
+                          <button
+                            onClick={() => handleDeleteHistoryKey(k.id)}
+                            disabled={deletingKeyId === k.id}
+                            className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 dark:text-slate-600 hover:text-red-400 hover:bg-red-400/10 transition-all disabled:opacity-50"
+                          >
+                            {deletingKeyId === k.id
+                              ? <span className="material-symbols-outlined animate-spin text-[16px]">progress_activity</span>
+                              : <span className="material-symbols-outlined text-[16px]">delete</span>}
+                          </button>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          )}
           <div className="w-full h-px bg-gray-200 dark:bg-slate-800/50"></div>
 
           {/* Billing Section */}

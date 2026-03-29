@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize')
-const { sequelize } = require('../config/db')
+const { getSequelize } = require('../config/db')
 
-const Resume = sequelize.define('Resume', {
+const Resume = getSequelize().define('Resume', {
   id:            { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
   userId:        { type: DataTypes.UUID, allowNull: true },
   fileName:      { type: DataTypes.STRING, allowNull: false },

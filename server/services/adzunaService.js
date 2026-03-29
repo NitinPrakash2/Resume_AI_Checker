@@ -2,26 +2,45 @@ const axios = require('axios')
 
 const BASE = 'https://api.adzuna.com/v1/api/jobs'
 
+const ALLOWED_COUNTRIES = new Set([
+  'gb','us','au','at','be','br','ca','de','fr','in','it','mx','nl','nz','pl','ru','sg','za',
+])
+
+// Strip any character that is not alphanumeric, space, hyphen, comma, or period
+function sanitizeText(str) {
+  return String(str || '').replace(/[^\w\s,.-]/g, '').trim().replace(/\s+/g, ' ')
+}
+
 async function searchJobs({ keywords = '', location = '', page = 1, results = 10 }) {
   const appId   = process.env.ADZUNA_APP_ID
   const appKey  = process.env.ADZUNA_APP_KEY
-  const country = process.env.ADZUNA_COUNTRY || 'in'
+  const rawCountry = (process.env.ADZUNA_COUNTRY || 'in').toLowerCase()
 
   if (!appId || !appKey || appId === 'your_adzuna_app_id') {
     return getMockJobs(keywords)
   }
 
-  const cleanKeywords = keywords.trim().replace(/\s+/g, ' ') || 'developer'
-  const apiUrl = `${BASE}/${country}/search/${page}`
+  // Allowlist country to prevent path manipulation (CWE-918)
+  const country = ALLOWED_COUNTRIES.has(rawCountry) ? rawCountry : 'in'
+
+  // Sanitize page: must be a positive integer, capped at 10
+  const safePage = Math.min(10, Math.max(1, parseInt(page, 10) || 1))
+
+  // Sanitize free-text inputs before they reach the external request
+  const cleanKeywords = sanitizeText(keywords) || 'developer'
+  const cleanLocation = sanitizeText(location)
+
+  // Build URL from validated, allowlisted segments only
+  const apiUrl = `${BASE}/${country}/search/${safePage}`
   const params = { app_id: appId, app_key: appKey, results_per_page: results, what: cleanKeywords }
-  if (location?.trim()) params.where = location.trim()
+  if (cleanLocation) params.where = cleanLocation
 
   try {
     const { data } = await axios.get(apiUrl, { params, timeout: 15000 })
     const jobs = data.results || []
 
     if (jobs.length === 0) {
-      const fallbackKeyword = keywords.split(' ')[0] || 'assistant'
+      const fallbackKeyword = cleanKeywords.split(' ')[0] || 'assistant'
       const { data: fb } = await axios.get(apiUrl, {
         params: { app_id: appId, app_key: appKey, results_per_page: results, what: fallbackKeyword },
         timeout: 15000,
@@ -76,4 +95,23 @@ function getMockJobs(keywords) {
   return filtered.length > 0 ? filtered : all.slice(0, 5)
 }
 
-module.exports = { searchJobs }
+function calculateMatchScore(resumeKeywords, jobDescription) {
+  if (!resumeKeywords.length || !jobDescription) return 0
+  const desc = jobDescription.toLowerCase()
+  const matched = resumeKeywords.filter(k => desc.includes(k.toLowerCase()))
+  return Math.round((matched.length / resumeKeywords.length) * 100)
+}
+
+function extractJobSkills(description) {
+  const techTerms = [
+    'javascript','typescript','python','java','react','node','express','sql','postgresql',
+    'mongodb','aws','docker','kubernetes','git','rest','graphql','css','html','vue','angular',
+    'machine learning','ai','data science','figma','sketch','agile','scrum','ci/cd','linux',
+    'django','flask','spring','kotlin','swift','php','ruby','rust','go','scala','next','nuxt',
+    'tailwind','redux','firebase','supabase','prisma','mysql','redis','nginx','jenkins',
+  ]
+  const lower = description.toLowerCase()
+  return techTerms.filter(t => lower.includes(t))
+}
+
+module.exports = { searchJobs, calculateMatchScore, extractJobSkills }

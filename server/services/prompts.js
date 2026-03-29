@@ -1,62 +1,45 @@
-const analyzeResume = (resumeText, jobDesc = '') => `
-You are a senior technical recruiter. Analyze the resume and return ONLY valid JSON (no markdown):
-{
-  "score": <0-100 job match %>,
-  "atsScore": <0-100 ATS readability>,
-  "summary": "<2 sentence overall feedback>",
-  "strengths": ["strength 1", "strength 2", "strength 3"],
-  "weaknesses": ["weakness 1", "weakness 2", "weakness 3"],
-  "suggestions": ["improvement 1", "improvement 2", "improvement 3"],
-  "keywords": ["keyword1", "keyword2"],
-  "missing": ["missing1", "missing2"],
-  "questions": ["question 1", "question 2", "question 3"],
-  "rejectionReasons": ["reason 1", "reason 2"]
-}
-${jobDesc ? `\nJob Description:\n${jobDesc}\n` : ''}
-Resume:
-${resumeText}`
+const analyzeResume = (text, jd) => `You are an expert resume analyst and ATS system. Analyze this resume${jd ? ' against the job description' : ''} and return ONLY valid JSON, no markdown.
 
-const simulateATS = (resumeText, jobDesc = '') => `
-You are an ATS simulator. Return ONLY valid JSON (no markdown):
-{
-  "atsScore": <0-100>,
-  "passedKeywords": ["keyword1"],
-  "missingKeywords": ["missing1"],
-  "rejectionReasons": ["reason1"],
-  "formatIssues": ["issue1"],
-  "recommendations": ["fix1"]
-}
-${jobDesc ? `Job Description:\n${jobDesc}\n` : ''}
-Resume:
-${resumeText}`
+RESUME:
+${text.slice(0, 3000)}
+${jd ? `\nJOB DESCRIPTION:\n${jd.slice(0, 1000)}` : ''}
 
-const generateInterviewQuestions = (resumeText, jobDesc = '') => `
-You are an expert interviewer. Generate interview questions and return ONLY valid JSON (no markdown):
-{
-  "hr": [{ "question": "HR question", "category": "HR", "difficulty": "Medium" }],
-  "technical": [{ "question": "technical question", "category": "Technical", "difficulty": "Hard" }],
-  "situational": [{ "question": "situational question", "category": "Situational", "difficulty": "Medium" }]
-}
-Generate 5 HR, 5 Technical, 3 Situational questions.
-${jobDesc ? `Job Description:\n${jobDesc}\n` : ''}
-Resume:
-${resumeText}`
+Return this exact JSON structure:
+{"score":75,"atsScore":70,"summary":"2-3 sentence professional summary","strengths":["strength1","strength2","strength3"],"weaknesses":["weakness1","weakness2"],"suggestions":["suggestion1","suggestion2","suggestion3"],"keywords":["keyword1","keyword2","keyword3"],"missing":["missing1","missing2"],"questions":["question1","question2","question3","question4","question5"],"rejectionReasons":["reason1","reason2"]}`
 
-const rewriteResume = (resumeText, jobDesc = '') => `
-You are a professional resume writer. Rewrite and improve this resume. Return ONLY valid JSON (no markdown):
-{
-  "rewrittenText": "<full improved resume with stronger action verbs and quantified achievements>",
-  "improvements": ["improvement 1", "improvement 2"],
-  "scoreImprovement": <number>
-}
-${jobDesc ? `Target Job:\n${jobDesc}\n` : ''}
-Original Resume:
-${resumeText}`
+const simulateATS = (text, jd) => `You are an ATS (Applicant Tracking System). Analyze this resume${jd ? ' against the job description' : ''} and return ONLY valid JSON, no markdown.
 
-const getAIAnswer = (question, context = '') => `
-You are an expert career coach. Give a STAR method interview answer under 150 words.
-${context ? `Candidate context: ${context}\n` : ''}
-Question: "${question}"
-Return ONLY valid JSON (no markdown): { "answer": "...", "tips": ["tip1", "tip2"] }`
+RESUME:
+${text.slice(0, 3000)}
+${jd ? `\nJOB DESCRIPTION:\n${jd.slice(0, 1000)}` : ''}
+
+Return this exact JSON structure:
+{"atsScore":75,"keywordMatches":["kw1","kw2"],"missingKeywords":["mk1","mk2"],"formatIssues":["issue1"],"recommendations":["rec1","rec2"],"passedATS":true}`
+
+const generateInterviewQuestions = (text, jd) => `You are an expert interviewer. Generate interview questions based on this resume${jd ? ' and job description' : ''} and return ONLY valid JSON, no markdown.
+
+RESUME:
+${text.slice(0, 2000)}
+${jd ? `\nJOB DESCRIPTION:\n${jd.slice(0, 800)}` : ''}
+
+Return this exact JSON structure:
+{"questions":["question1","question2","question3","question4","question5","question6","question7","question8"]}`
+
+const rewriteResume = (text, jd) => `You are a professional resume writer. Rewrite and improve this resume${jd ? ' to better match the job description' : ''} and return ONLY valid JSON, no markdown.
+
+RESUME:
+${text.slice(0, 3000)}
+${jd ? `\nJOB DESCRIPTION:\n${jd.slice(0, 1000)}` : ''}
+
+Return this exact JSON structure:
+{"rewrittenText":"full improved resume text here","improvements":["improvement1","improvement2","improvement3"]}`
+
+const getAIAnswer = (question, context) => `You are an expert career coach helping someone prepare for a job interview. Provide a helpful, specific answer using the STAR method where applicable. Return ONLY valid JSON, no markdown.
+
+QUESTION: ${question}
+${context ? `CONTEXT: ${context}` : ''}
+
+Return this exact JSON structure:
+{"answer":"detailed suggested answer here","tips":["tip1","tip2","tip3"],"starMethod":{"situation":"describe situation","task":"describe task","action":"describe action","result":"describe result"}}`
 
 module.exports = { analyzeResume, simulateATS, generateInterviewQuestions, rewriteResume, getAIAnswer }

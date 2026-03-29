@@ -1,8 +1,8 @@
 const { DataTypes } = require('sequelize')
 const bcrypt = require('bcryptjs')
-const { sequelize } = require('../config/db')
+const { getSequelize } = require('../config/db')
 
-const User = sequelize.define('User', {
+const User = getSequelize().define('User', {
   id:             { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
   name:           { type: DataTypes.STRING, allowNull: false },
   email:          { type: DataTypes.STRING, allowNull: false, unique: true, validate: { isEmail: true } },
@@ -10,9 +10,12 @@ const User = sequelize.define('User', {
   aiProvider:     { type: DataTypes.STRING, defaultValue: 'openrouter' },
   aiApiKey:       { type: DataTypes.STRING },
   aiModel:        { type: DataTypes.STRING },
+  savedApiKeys:   { type: DataTypes.JSON, defaultValue: [] },
   latestResumeId: { type: DataTypes.UUID, allowNull: true },
-  resetOtp:        { type: DataTypes.STRING, allowNull: true },
-  resetOtpExpiry:  { type: DataTypes.BIGINT, allowNull: true },
+  resetOtp:           { type: DataTypes.STRING, allowNull: true },
+  resetOtpExpiry:     { type: DataTypes.BIGINT, allowNull: true },
+  pwdFailedAttempts:  { type: DataTypes.INTEGER, defaultValue: 0 },
+  pwdLockedUntil:     { type: DataTypes.BIGINT, allowNull: true },
 }, {
   hooks: {
     beforeCreate: async (user) => {

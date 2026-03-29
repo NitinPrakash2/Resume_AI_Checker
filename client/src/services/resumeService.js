@@ -11,27 +11,34 @@ const tokenStore = {
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-function getLocalAICfg() {
+function getGuestAICfg() {
+  // Only used for non-logged-in (guest) users
   try {
-    // Only read from localStorage as fallback for non-logged-in users
     const keys     = JSON.parse(localStorage.getItem('resumeai_api_keys') || '{}')
     const provider = localStorage.getItem('resumeai_provider') || 'openrouter'
     const model    = localStorage.getItem('resumeai_model')    || ''
-    const apiKey   = keys[provider] || ''
-    return { provider, apiKey, model }
+    return { provider, apiKey: keys[provider] || '', model }
   } catch { return {} }
 }
 
 // Attach JWT + AI config headers to every request
 api.interceptors.request.use(config => {
   const token = tokenStore.get()
-  if (token) config.headers.Authorization = `Bearer ${token}`
-  const { provider, apiKey, model } = getLocalAICfg()
-  if (provider) config.headers['X-AI-Provider'] = provider
-  if (apiKey)   config.headers['X-AI-Key']      = apiKey
-  if (model)    config.headers['X-AI-Model']    = model
+  if (token) {
+    // Logged-in: server reads AI config from DB — no localStorage headers needed
+    config.headers.Authorization = `Bearer ${token}`
+  } else {
+    // Guest fallback: send localStorage AI config as headers
+    const { provider, apiKey, model } = getGuestAICfg()
+    if (provider) config.headers['X-AI-Provider'] = provider
+    if (apiKey)   config.headers['X-AI-Key']      = apiKey
+    if (model)    config.headers['X-AI-Model']    = model
+  }
   return config
 })
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+const safeId  = (id) => (id && UUID_RE.test(String(id)) ? String(id) : null)
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 export const register = async (name, email, password) => {
@@ -114,7 +121,7 @@ export const getLatestResumeId = async () => {
 }
 
 export const getResult = async (id) => {
-  const { data } = await api.get(`/resume/result/${id}`)
+  const { data } = await api.get(`/resume/result/${safeId(id)}`)
   return data
 }
 
@@ -124,29 +131,54 @@ export const getHistory = async () => {
 }
 
 export const deleteResume = async (id) => {
-  const { data } = await api.delete(`/resume/${id}`)
+  const { data } = await api.delete(`/resume/${safeId(id)}`)
   return data
 }
 
 export const runATS = async (resumeId, jobDesc = '') => {
-  const { data } = await api.post(`/resume/ats/${resumeId}`, { jobDesc })
+  const { data } = await api.post(`/resume/ats/${safeId(resumeId)}`, { jobDesc })
   return data
 }
 
 export const rewriteResume = async (resumeId, jobDesc = '') => {
-  const { data } = await api.post(`/resume/rewrite/${resumeId}`, { jobDesc })
+  const { data } = await api.post(`/resume/rewrite/${safeId(resumeId)}`, { jobDesc })
+  return data
+}
+
+// ── Saved API Keys ───────────────────────────────────────────────────────────
+export const getSavedKeys = async () => {
+  const { data } = await api.get('/auth/saved-keys')
+  return data
+}
+
+export const saveApiKey = async (label, provider, apiKey, model) => {
+  const { data } = await api.post('/auth/saved-keys', { label, provider, apiKey, model })
+  return data
+}
+
+export const deleteSavedKey = async (keyId) => {
+  const { data } = await api.delete(`/auth/saved-keys/${keyId}`)
   return data
 }
 
 // ── Jobs ──────────────────────────────────────────────────────────────────────
+export const getAISuggestedJobs = async (resumeId) => {
+  const { data } = await api.get(`/jobs/ai-suggested/${safeId(resumeId)}`)
+  return data
+}
+
 export const getJobs = async () => {
   const { data } = await api.get('/jobs')
   return data
 }
 
 export const searchJobs = async (q = '', location = '', resumeId = null, page = 1) => {
-  const params = { q, location, page }
-  if (resumeId) params.resumeId = resumeId
+  const safeQ        = String(q        || '').replace(/[^\w\s,.-]/g, '').trim().slice(0, 100)
+  const safeLocation = String(location || '').replace(/[^\w\s,.-]/g, '').trim().slice(0, 100)
+  const safePage     = Math.min(10, Math.max(1, parseInt(page, 10) || 1))
+  const params = { q: safeQ, location: safeLocation, page: safePage }
+  const validResumeId = safeId(resumeId)
+  if (validResumeId) params.resumeId = validResumeId
   const { data } = await api.get('/jobs/search', { params })
   return data
 }
@@ -173,7 +205,7 @@ export const getInterviews = async () => {
 }
 
 export const generateInterviewQuestions = async (resumeId) => {
-  const { data } = await api.post(`/interviews/generate/${resumeId}`)
+  const { data } = await api.post(`/interviews/generate/${safeId(resumeId)}`)
   return data
 }
 
@@ -189,6 +221,6 @@ export const getBenchmarkResumes = async () => {
 }
 
 export const analyzeBenchmark = async (resumeId) => {
-  const { data } = await api.get(`/benchmark/analyze/${resumeId}`)
+  const { data } = await api.get(`/benchmark/analyze/${safeId(resumeId)}`)
   return data
 }

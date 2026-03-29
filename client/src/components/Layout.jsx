@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import logoImg from '../../public/Fevicon.png'
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { getMe, logout } from '../services/resumeService'
 import { useTheme } from '../context/ThemeContext'
@@ -84,9 +85,7 @@ export default function Layout() {
       >
         {/* Logo */}
         <div className="px-5 py-6 flex items-center gap-3 border-b border-gray-200 dark:border-white/5">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-primary-container flex items-center justify-center flex-shrink-0">
-            <Sparkles className="w-4 h-4 text-[#0b1120]" />
-          </div>
+          <img src={logoImg} alt="logo" className="w-8 h-8 rounded-xl object-contain flex-shrink-0" />
           <div>
             <p className="text-sm font-bold text-gray-900 dark:text-[#dae2fd] tracking-tight leading-none">Resumate</p>
             <p className="text-[10px] text-primary/70 uppercase tracking-widest mt-0.5">Pro</p>

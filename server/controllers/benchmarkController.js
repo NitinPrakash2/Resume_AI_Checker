@@ -4,14 +4,12 @@ const { benchmarkResume } = require('../services/benchmarkService')
 const { searchJobs } = require('../services/adzunaService')
 
 async function getAICfg(req) {
-  const headerKey = req.headers['x-ai-key']
-  if (headerKey) return { provider: req.headers['x-ai-provider'] || 'openrouter', apiKey: headerKey, model: req.headers['x-ai-model'] || '' }
   if (req.user?.id) {
     const user = await User.findByPk(req.user.id, { attributes: ['aiProvider', 'aiApiKey', 'aiModel'] })
-    if (user?.aiApiKey) return { provider: user.aiProvider, apiKey: user.aiApiKey, model: user.aiModel }
-    if (user?.aiProvider) return { provider: user.aiProvider, apiKey: null, model: user.aiModel }
+    if (user?.aiApiKey) return { provider: user.aiProvider || 'openrouter', apiKey: user.aiApiKey, model: user.aiModel || '' }
+    return { provider: user?.aiProvider || 'openrouter', apiKey: null, model: user?.aiModel || '' }
   }
-  return { provider: req.headers['x-ai-provider'] || 'openrouter', apiKey: null, model: req.headers['x-ai-model'] || '' }
+  return { provider: req.headers['x-ai-provider'] || 'openrouter', apiKey: req.headers['x-ai-key'] || null, model: req.headers['x-ai-model'] || '' }
 }
 
 // GET /api/benchmark/analyze/:resumeId — real-time AI benchmark

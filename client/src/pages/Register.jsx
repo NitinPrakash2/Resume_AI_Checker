@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { register } from '../services/resumeService'
 import { useTheme } from '../context/ThemeContext'
+import logoImg from '../../public/Fevicon.png'
 
 export default function Register() {
   const navigate = useNavigate()
@@ -52,9 +53,7 @@ export default function Register() {
         {/* Header */}
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center gap-2 mb-6">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary-container rounded-lg flex items-center justify-center">
-              <span className="material-symbols-outlined text-[#0b1120]">description</span>
-            </div>
+            <img src={logoImg} alt="logo" className="w-10 h-10 rounded-lg object-contain" />
             <span className="text-2xl font-bold font-headline text-gray-900 dark:text-white">Resumate</span>
           </Link>
           <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white font-headline mb-2">Create Account</h1>

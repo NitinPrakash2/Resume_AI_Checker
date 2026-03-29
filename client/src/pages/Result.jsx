@@ -270,7 +270,7 @@ export default function Result() {
               </div>
               <div className="flex-1">
                 <p className="text-sm font-bold text-gray-900 dark:text-white mb-1">Resume Analyzed Successfully!</p>
-                <p className="text-xs text-gray-600 dark:text-slate-400 mb-4">We've found {result?.matchedJobsCount || 'several'} jobs that match your skills</p>
+                <p className="text-xs text-gray-600 dark:text-slate-400 mb-4">We've found jobs that match your skills</p>
                 <button onClick={() => navigate('/jobs')}
                   className="w-full py-2.5 bg-gradient-to-r from-blue-600 to-blue-500 dark:from-[#A6ADFF] dark:to-[#8892FF] text-white dark:text-[#0B0F19] text-sm font-bold rounded-xl hover:shadow-lg hover:shadow-blue-600/20 dark:hover:shadow-[#A6ADFF]/20 transition-all hover:scale-[1.02] flex items-center justify-center gap-2">
                   <span className="material-symbols-outlined text-lg">work</span>

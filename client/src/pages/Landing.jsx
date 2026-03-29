@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTheme } from '../context/ThemeContext'
+import logoImg from '../../public/Fevicon.png'
 
 export default function Landing() {
   const navigate = useNavigate()
@@ -35,9 +36,7 @@ export default function Landing() {
         {/* Drawer header */}
         <div className="flex items-center justify-between px-5 py-5 border-b border-gray-200 dark:border-white/10">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary-container rounded-xl flex items-center justify-center">
-              <span className="material-symbols-outlined text-[#0b1120] text-lg">description</span>
-            </div>
+            <img src={logoImg} alt="logo" className="w-8 h-8 rounded-xl object-contain" />
             <span className="text-base font-extrabold font-headline text-gray-900 dark:text-white">Resumate</span>
           </div>
           <button
@@ -88,9 +87,7 @@ export default function Landing() {
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-gradient-to-br from-primary to-primary-container rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
-                <span className="material-symbols-outlined text-[#0b1120] text-xl font-bold">description</span>
-              </div>
+              <img src={logoImg} alt="logo" className="w-9 h-9 rounded-xl object-contain" />
               <div>
                 <span className="text-xl font-extrabold font-headline tracking-tight text-gray-900 dark:text-white">Resumate</span>
                 <span className="ml-2 px-2 py-0.5 bg-primary/10 border border-primary/20 text-primary text-[10px] font-bold rounded-md uppercase tracking-wider">Pro</span>
@@ -439,47 +436,75 @@ export default function Landing() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-gray-200 dark:border-white/5 py-12 px-6 bg-gray-50 dark:bg-transparent">
+      <footer className="border-t border-gray-200 dark:border-white/5 py-12 px-6 bg-gray-50 dark:bg-[#070d1a]">
         <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            <div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
+            {/* Brand */}
+            <div className="col-span-2 md:col-span-1">
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary-container rounded-lg flex items-center justify-center">
-                  <span className="material-symbols-outlined text-[#0b1120] text-lg">description</span>
-                </div>
+                <img src={logoImg} alt="logo" className="w-8 h-8 rounded-lg object-contain" />
                 <span className="text-xl font-bold font-headline text-gray-900 dark:text-white">Resumate</span>
               </div>
-              <p className="text-sm text-gray-500 dark:text-[#8892a4]">
-              AI-powered resume analysis to help you land your dream job.
+              <p className="text-sm text-gray-500 dark:text-[#8892a4] mb-5 leading-relaxed">
+                AI-powered resume analysis to help you land your dream job faster.
               </p>
+              {/* Social icons */}
+              <div className="flex items-center gap-3">
+                <a href="https://twitter.com" target="_blank" rel="noreferrer" title="Twitter" className="w-8 h-8 bg-gray-100 dark:bg-white/5 rounded-lg flex items-center justify-center text-gray-500 dark:text-[#8892a4] hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-white/10 transition-all">
+                  <span className="material-symbols-outlined text-sm">tag</span>
+                </a>
+                <a href="https://linkedin.com" target="_blank" rel="noreferrer" title="LinkedIn" className="w-8 h-8 bg-gray-100 dark:bg-white/5 rounded-lg flex items-center justify-center text-gray-500 dark:text-[#8892a4] hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-white/10 transition-all">
+                  <span className="material-symbols-outlined text-sm">work</span>
+                </a>
+                <a href="https://github.com" target="_blank" rel="noreferrer" title="GitHub" className="w-8 h-8 bg-gray-100 dark:bg-white/5 rounded-lg flex items-center justify-center text-gray-500 dark:text-[#8892a4] hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/10 transition-all">
+                  <span className="material-symbols-outlined text-sm">code</span>
+                </a>
+              </div>
             </div>
 
-            {[
-              { title: 'Product', links: ['Features', 'Pricing', 'How it Works', 'FAQ'] },
-              { title: 'Company', links: ['About', 'Blog', 'Careers', 'Contact'] },
-              { title: 'Legal', links: ['Privacy', 'Terms', 'Security', 'Cookies'] },
-            ].map((col, i) => (
-              <div key={i}>
-                <h3 className="text-sm font-bold text-gray-900 dark:text-[#dae2fd] mb-4">{col.title}</h3>
-                <ul className="space-y-2">
-                  {col.links.map((item, j) => (
-                    <li key={j}>
-                      <a href="#" className="text-sm text-gray-500 dark:text-[#8892a4] hover:text-blue-600 dark:hover:text-primary transition-colors">{item}</a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
+            {/* Product */}
+            <div>
+              <h3 className="text-sm font-bold text-gray-900 dark:text-[#dae2fd] mb-4">Product</h3>
+              <ul className="space-y-2.5">
+                <li><a href="#features" className="text-sm text-gray-500 dark:text-[#8892a4] hover:text-blue-600 dark:hover:text-primary transition-colors">Features</a></li>
+                <li><a href="#pricing" className="text-sm text-gray-500 dark:text-[#8892a4] hover:text-blue-600 dark:hover:text-primary transition-colors">Pricing</a></li>
+                <li><a href="#how-it-works" className="text-sm text-gray-500 dark:text-[#8892a4] hover:text-blue-600 dark:hover:text-primary transition-colors">How it Works</a></li>
+                <li><button onClick={() => navigate('/dashboard')} className="text-sm text-gray-500 dark:text-[#8892a4] hover:text-blue-600 dark:hover:text-primary transition-colors">Dashboard</button></li>
+              </ul>
+            </div>
+
+            {/* Company */}
+            <div>
+              <h3 className="text-sm font-bold text-gray-900 dark:text-[#dae2fd] mb-4">Company</h3>
+              <ul className="space-y-2.5">
+                <li><button onClick={() => navigate('/register')} className="text-sm text-gray-500 dark:text-[#8892a4] hover:text-blue-600 dark:hover:text-primary transition-colors">Get Started</button></li>
+                <li><button onClick={() => navigate('/login')} className="text-sm text-gray-500 dark:text-[#8892a4] hover:text-blue-600 dark:hover:text-primary transition-colors">Sign In</button></li>
+                <li><a href="mailto:support@resumate.ai" className="text-sm text-gray-500 dark:text-[#8892a4] hover:text-blue-600 dark:hover:text-primary transition-colors">Contact Us</a></li>
+                <li><a href="mailto:support@resumate.ai" className="text-sm text-gray-500 dark:text-[#8892a4] hover:text-blue-600 dark:hover:text-primary transition-colors">Support</a></li>
+              </ul>
+            </div>
+
+            {/* Legal */}
+            <div>
+              <h3 className="text-sm font-bold text-gray-900 dark:text-[#dae2fd] mb-4">Legal</h3>
+              <ul className="space-y-2.5">
+                <li><a href="#" className="text-sm text-gray-500 dark:text-[#8892a4] hover:text-blue-600 dark:hover:text-primary transition-colors">Privacy Policy</a></li>
+                <li><a href="#" className="text-sm text-gray-500 dark:text-[#8892a4] hover:text-blue-600 dark:hover:text-primary transition-colors">Terms of Service</a></li>
+                <li><a href="#" className="text-sm text-gray-500 dark:text-[#8892a4] hover:text-blue-600 dark:hover:text-primary transition-colors">Cookie Policy</a></li>
+                <li><a href="#" className="text-sm text-gray-500 dark:text-[#8892a4] hover:text-blue-600 dark:hover:text-primary transition-colors">Security</a></li>
+              </ul>
+            </div>
           </div>
 
-          <div className="pt-8 border-t border-gray-200 dark:border-white/5 flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-sm text-gray-500 dark:text-[#8892a4]">© 2024 Resumate. All rights reserved.</p>
-            <div className="flex items-center gap-4">
-              {['twitter', 'linkedin', 'github'].map((social, i) => (
-                <a key={i} href="#" className="w-8 h-8 bg-gray-100 dark:bg-white/5 rounded-lg flex items-center justify-center text-gray-500 dark:text-[#8892a4] hover:text-blue-600 dark:hover:text-primary hover:bg-gray-200 dark:hover:bg-white/10 transition-all">
-                  <span className="material-symbols-outlined text-sm">{social === 'twitter' ? 'tag' : social === 'linkedin' ? 'work' : 'code'}</span>
-                </a>
-              ))}
+          {/* Bottom bar */}
+          <div className="pt-8 border-t border-gray-200 dark:border-white/5 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p className="text-sm text-gray-500 dark:text-[#8892a4] text-center sm:text-left">© {new Date().getFullYear()} Resumate. All rights reserved.</p>
+            <div className="flex items-center gap-4 text-xs text-gray-400 dark:text-[#8892a4]">
+              <a href="#" className="hover:text-blue-600 dark:hover:text-primary transition-colors">Privacy</a>
+              <span>·</span>
+              <a href="#" className="hover:text-blue-600 dark:hover:text-primary transition-colors">Terms</a>
+              <span>·</span>
+              <a href="mailto:support@resumate.ai" className="hover:text-blue-600 dark:hover:text-primary transition-colors">Contact</a>
             </div>
           </div>
         </div>
