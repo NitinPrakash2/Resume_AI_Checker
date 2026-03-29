@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { getMe, logout } from '../services/resumeService'
 import { useTheme } from '../context/ThemeContext'
-import { LayoutDashboard, Upload, BarChart3, Briefcase, MessageSquare, History, Settings, Sparkles, Plus, User, ChevronDown, Menu, Search, Bell, Zap, CheckCircle, LogOut, Sun, Moon } from 'lucide-react'
+import { LayoutDashboard, Upload, BarChart3, Briefcase, MessageSquare, Award, History, Settings, Sparkles, Plus, User, ChevronDown, Menu, Search, Bell, Zap, CheckCircle, LogOut, Sun, Moon } from 'lucide-react'
 
 const NAV = [
   { Icon: LayoutDashboard, label: 'Dashboard',  to: '/dashboard',  end: true },
@@ -10,6 +10,7 @@ const NAV = [
   { Icon: BarChart3,       label: 'Analysis',    to: '/result' },
   { Icon: Briefcase,       label: 'Job Matches', to: '/jobs' },
   { Icon: MessageSquare,   label: 'Interviews',  to: '/interviews' },
+  { Icon: Award,           label: 'Benchmark',   to: '/benchmark' },
   { Icon: History,         label: 'History',     to: '/history' },
   { Icon: Settings,        label: 'Settings',    to: '/settings' },
 ]
@@ -87,7 +88,7 @@ export default function Layout() {
             <Sparkles className="w-4 h-4 text-[#0b1120]" />
           </div>
           <div>
-            <p className="text-sm font-bold text-gray-900 dark:text-[#dae2fd] tracking-tight leading-none">ResumeAI</p>
+            <p className="text-sm font-bold text-gray-900 dark:text-[#dae2fd] tracking-tight leading-none">Resumate</p>
             <p className="text-[10px] text-primary/70 uppercase tracking-widest mt-0.5">Pro</p>
           </div>
         </div>
@@ -95,11 +96,11 @@ export default function Layout() {
         {/* Nav */}
         <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
           <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-[#3d4a5c] px-4 mb-2">Main</p>
-          {NAV.slice(0, 5).map(n => (
+          {NAV.slice(0, 6).map(n => (
             <SidebarLink key={n.to} {...n} onClick={() => setSidebarOpen(false)} />
           ))}
           <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-[#3d4a5c] px-4 mt-4 mb-2">Account</p>
-          {NAV.slice(5).map(n => (
+          {NAV.slice(6).map(n => (
             <SidebarLink key={n.to} {...n} onClick={() => setSidebarOpen(false)} />
           ))}
         </nav>
@@ -158,7 +159,7 @@ export default function Layout() {
       <div className="lg:ml-60 flex flex-col min-h-screen w-full">
 
         {/* Topbar */}
-        <header className="sticky top-0 z-30 h-14 flex items-center justify-between px-4 lg:px-6 border-b border-gray-200 dark:border-white/5 bg-white/80 dark:bg-[rgba(23,31,51,0.7)] backdrop-blur-xl">
+        <header className="sticky top-0 z-30 h-14 flex items-center justify-between px-4 lg:px-6 border-b-2 border-gray-300 dark:border-white/5 bg-white dark:bg-[rgba(23,31,51,0.7)] backdrop-blur-xl shadow-sm">
           <div className="flex items-center gap-3">
             {/* Hamburger — visible on mobile only */}
             <button

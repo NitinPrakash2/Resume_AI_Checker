@@ -36,4 +36,5 @@ module.exports = {
   generateInterviewQuestions: (text, jd, cfg = {}) => call('generateInterviewQuestions', cfg.provider || 'openrouter', cfg.apiKey, cfg.model, text, jd),
   rewriteResume:              (text, jd, cfg = {}) => call('rewriteResume',              cfg.provider || 'openrouter', cfg.apiKey, cfg.model, text, jd),
   getAIAnswer:                (q, ctx, cfg = {})   => call('getAIAnswer',                cfg.provider || 'openrouter', cfg.apiKey, cfg.model, q, ctx),
+  callAI:                     (prompt, cfg = {})   => call('generate',                   cfg.provider || 'openrouter', cfg.apiKey, cfg.model, prompt),
 }

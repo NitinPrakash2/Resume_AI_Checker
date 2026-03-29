@@ -144,11 +144,6 @@ export const getJobs = async () => {
   return data
 }
 
-export const getAISuggestedJobs = async (resumeId) => {
-  const { data } = await api.get(`/jobs/ai-suggested/${resumeId}`)
-  return data
-}
-
 export const searchJobs = async (q = '', location = '', resumeId = null, page = 1) => {
   const params = { q, location, page }
   if (resumeId) params.resumeId = resumeId
@@ -184,5 +179,16 @@ export const generateInterviewQuestions = async (resumeId) => {
 
 export const getAIAnswer = async (question, resumeId) => {
   const { data } = await api.post('/interviews/answer', { question, resumeId })
+  return data
+}
+
+// ── Benchmark ─────────────────────────────────────────────────────────────────
+export const getBenchmarkResumes = async () => {
+  const { data } = await api.get('/benchmark/resumes')
+  return data
+}
+
+export const analyzeBenchmark = async (resumeId) => {
+  const { data } = await api.get(`/benchmark/analyze/${resumeId}`)
   return data
 }

@@ -155,9 +155,9 @@ const forgotPassword = async (req, res, next) => {
 
     const transporter = getTransporter()
     await transporter.sendMail({
-      from: `"ResumeAI" <${process.env.EMAIL_USER}>`,
+      from: `"Resumate" <${process.env.EMAIL_USER}>`,
       to:   email,
-      subject: 'Your ResumeAI Password Reset OTP',
+      subject: 'Your Resumate Password Reset OTP',
       html: `
         <div style="font-family:Inter,sans-serif;max-width:480px;margin:auto;padding:32px;background:#0f1829;border-radius:16px;color:#dae2fd">
           <h2 style="margin:0 0 8px;font-size:22px">Reset your password</h2>

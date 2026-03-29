@@ -7,6 +7,7 @@ import Upload from './pages/Upload'
 import Result from './pages/Result'
 import Jobs from './pages/Jobs'
 import Interviews from './pages/Interviews'
+import Benchmark from './pages/Benchmark'
 import History from './pages/History'
 import Settings from './pages/Settings'
 import Login from './pages/Login'
@@ -26,6 +27,7 @@ export default function App() {
         <Route path="/result" element={<Result />} />
         <Route path="/jobs" element={<Jobs />} />
         <Route path="/interviews" element={<Interviews />} />
+        <Route path="/benchmark" element={<Benchmark />} />
         <Route path="/history" element={<History />} />
         <Route path="/settings" element={<Settings />} />
       </Route>

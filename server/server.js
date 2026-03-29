@@ -20,12 +20,14 @@ initSequelize().then(() => {
   require('./models/User')
   require('./models/Resume')
   require('./models/Job')
+  require('./models/Benchmark')
 
   // Routes must load AFTER models
   app.use('/api/auth',       require('./routes/authRoutes'))
   app.use('/api/resume',     require('./routes/resumeRoutes'))
   app.use('/api/jobs',       require('./routes/jobRoutes'))
   app.use('/api/interviews', require('./routes/interviewRoutes'))
+  app.use('/api/benchmark',  require('./routes/benchmarkRoutes'))
 
   app.get('/api/health', (req, res) => res.json({ status: 'ok', ts: new Date() }))
 

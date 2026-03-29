@@ -38,7 +38,7 @@ export default function Landing() {
             <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary-container rounded-xl flex items-center justify-center">
               <span className="material-symbols-outlined text-[#0b1120] text-lg">description</span>
             </div>
-            <span className="text-base font-extrabold font-headline text-gray-900 dark:text-white">ResumeAI</span>
+            <span className="text-base font-extrabold font-headline text-gray-900 dark:text-white">Resumate</span>
           </div>
           <button
             onClick={() => setMenuOpen(false)}
@@ -74,15 +74,15 @@ export default function Landing() {
       </div>
 
       {/* Navbar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 transition-all duration-300" style={{
+      <nav className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b-2" style={{
         background: scrolled
-          ? dark ? 'rgba(7,13,26,0.92)' : 'rgba(255,255,255,0.92)'
+          ? dark ? 'rgba(7,13,26,0.95)' : 'rgba(255,255,255,0.98)'
           : dark ? 'rgba(7,13,26,1)' : 'rgba(255,255,255,1)',
-        backdropFilter: scrolled ? 'blur(12px)' : 'none',
-        borderBottom: scrolled
-          ? dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(229,231,235,0.8)'
-          : '1px solid transparent',
-        boxShadow: scrolled ? '0 1px 12px rgba(0,0,0,0.08)' : 'none',
+        backdropFilter: scrolled ? 'blur(4px)' : 'none',
+        borderBottomColor: scrolled
+          ? dark ? 'rgba(255,255,255,0.06)' : 'rgba(156,163,175,0.5)'
+          : dark ? 'rgba(255,255,255,0.06)' : 'rgba(209,213,219,0.8)',
+        boxShadow: scrolled ? '0 2px 12px rgba(0,0,0,0.08)' : '0 1px 3px rgba(0,0,0,0.05)',
       }}>
         <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
@@ -92,7 +92,7 @@ export default function Landing() {
                 <span className="material-symbols-outlined text-[#0b1120] text-xl font-bold">description</span>
               </div>
               <div>
-                <span className="text-xl font-extrabold font-headline tracking-tight text-gray-900 dark:text-white">ResumeAI</span>
+                <span className="text-xl font-extrabold font-headline tracking-tight text-gray-900 dark:text-white">Resumate</span>
                 <span className="ml-2 px-2 py-0.5 bg-primary/10 border border-primary/20 text-primary text-[10px] font-bold rounded-md uppercase tracking-wider">Pro</span>
               </div>
             </div>
@@ -159,11 +159,10 @@ export default function Landing() {
           </div>
 
           <h1 className="text-5xl md:text-7xl font-extrabold font-headline mb-6 text-gray-900 dark:text-white animate-fade-up" style={{ animationDelay: '0.1s' }}>
-            Boost Your Resume
-            <br />
             <span className="bg-gradient-to-r from-primary via-primary-container to-blue-400 bg-clip-text text-transparent">
-              with AI
+              Resumate AI
             </span>
+            <span className="block text-gray-900 dark:text-white">– Your AI Career Copilot</span>
           </h1>
 
           <p className="text-lg md:text-xl text-gray-500 dark:text-[#8892a4] max-w-2xl mx-auto mb-10 animate-fade-up" style={{ animationDelay: '0.2s' }}>
@@ -215,12 +214,12 @@ export default function Landing() {
               { icon: 'forum', title: 'AI Interview Prep', description: 'Practice with AI-generated interview questions', color: 'from-purple-500 to-pink-500', delay: '0.2s' },
               { icon: 'edit_note', title: 'Resume Rewriter', description: 'AI-powered resume enhancement and rewriting', color: 'from-orange-500 to-red-500', delay: '0.3s' },
             ].map((feature, i) => (
-              <div key={i} className="group card-hover bg-white dark:bg-[#0f1829] border border-gray-200 dark:border-white/[0.06] rounded-2xl p-6 hover:border-blue-300 dark:hover:border-primary/30 shadow-sm hover:shadow-md dark:shadow-none transition-all animate-fade-up" style={{ animationDelay: feature.delay }}>
-                <div className={`w-12 h-12 bg-gradient-to-br ${feature.color} rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+              <div key={i} className="group card-hover bg-white dark:bg-[#0f1829] border-2 border-gray-300 dark:border-white/[0.06] rounded-2xl p-6 hover:border-blue-400 dark:hover:border-primary/30 shadow-md hover:shadow-xl dark:shadow-none dark:hover:shadow-lg transition-all animate-fade-up" style={{ animationDelay: feature.delay }}>
+                <div className={`w-12 h-12 bg-gradient-to-br ${feature.color} rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-lg`}>
                   <span className="material-symbols-outlined text-white">{feature.icon}</span>
                 </div>
                 <h3 className="text-lg font-bold text-gray-900 dark:text-[#dae2fd] mb-2">{feature.title}</h3>
-                <p className="text-sm text-gray-500 dark:text-[#8892a4]">{feature.description}</p>
+                <p className="text-sm text-gray-600 dark:text-[#8892a4]">{feature.description}</p>
               </div>
             ))}
           </div>
@@ -243,16 +242,16 @@ export default function Landing() {
 
           <div className="grid md:grid-cols-3 gap-6">
             {[
-              { icon: 'cloud_upload', title: 'Upload Resume', description: 'Drop your PDF or DOCX resume and let our system parse it instantly.', color: 'from-blue-500 to-primary', bg: 'bg-blue-50 dark:bg-blue-500/10', border: 'border-blue-100 dark:border-blue-500/20', hover: 'hover:border-blue-300 dark:hover:border-blue-400/40 hover:shadow-blue-100 dark:hover:shadow-blue-500/10' },
-              { icon: 'auto_awesome', title: 'AI Analysis', description: 'Our AI scans for ATS compatibility, keywords, and job match in seconds.', color: 'from-purple-500 to-pink-500', bg: 'bg-purple-50 dark:bg-purple-500/10', border: 'border-purple-100 dark:border-purple-500/20', hover: 'hover:border-purple-300 dark:hover:border-purple-400/40 hover:shadow-purple-100 dark:hover:shadow-purple-500/10' },
-              { icon: 'insights', title: 'Get Insights', description: 'Receive a detailed score, improvement tips, and tailored job matches.', color: 'from-green-500 to-emerald-500', bg: 'bg-green-50 dark:bg-green-500/10', border: 'border-green-100 dark:border-green-500/20', hover: 'hover:border-green-300 dark:hover:border-green-400/40 hover:shadow-green-100 dark:hover:shadow-green-500/10' },
+              { icon: 'cloud_upload', title: 'Upload Resume', description: 'Drop your PDF or DOCX resume and let our system parse it instantly.', color: 'from-blue-500 to-primary', bg: 'bg-blue-50 dark:bg-blue-500/10', border: 'border-blue-300 dark:border-blue-500/20', hover: 'hover:border-blue-500 dark:hover:border-blue-400/40 hover:shadow-2xl hover:shadow-blue-200/50 dark:hover:shadow-blue-500/10' },
+              { icon: 'auto_awesome', title: 'AI Analysis', description: 'Our AI scans for ATS compatibility, keywords, and job match in seconds.', color: 'from-purple-500 to-pink-500', bg: 'bg-purple-50 dark:bg-purple-500/10', border: 'border-purple-300 dark:border-purple-500/20', hover: 'hover:border-purple-500 dark:hover:border-purple-400/40 hover:shadow-2xl hover:shadow-purple-200/50 dark:hover:shadow-purple-500/10' },
+              { icon: 'insights', title: 'Get Insights', description: 'Receive a detailed score, improvement tips, and tailored job matches.', color: 'from-green-500 to-emerald-500', bg: 'bg-green-50 dark:bg-green-500/10', border: 'border-green-300 dark:border-green-500/20', hover: 'hover:border-green-500 dark:hover:border-green-400/40 hover:shadow-2xl hover:shadow-green-200/50 dark:hover:shadow-green-500/10' },
             ].map((step, i) => (
-              <div key={i} className={`flex flex-col items-center text-center p-8 rounded-3xl border-2 ${step.border} ${step.bg} ${step.hover} shadow-sm hover:shadow-xl dark:hover:shadow-lg transition-all duration-300 group`}>
+              <div key={i} className={`flex flex-col items-center text-center p-8 rounded-3xl border-2 ${step.border} ${step.bg} ${step.hover} shadow-md hover:shadow-2xl dark:hover:shadow-lg transition-all duration-300 group`}>
                 <div className={`w-16 h-16 bg-gradient-to-br ${step.color} rounded-2xl flex items-center justify-center mb-5 shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}>
                   <span className="material-symbols-outlined text-3xl text-white">{step.icon}</span>
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-primary dark:group-hover:text-primary transition-colors">{step.title}</h3>
-                <p className="text-sm text-gray-500 dark:text-[#8892a4] leading-relaxed">{step.description}</p>
+                <p className="text-sm text-gray-700 dark:text-[#8892a4] leading-relaxed">{step.description}</p>
               </div>
             ))}
           </div>
@@ -271,24 +270,24 @@ export default function Landing() {
 
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-to-r from-primary/10 dark:from-primary/20 to-purple-500/10 dark:to-purple-500/20 blur-3xl" />
-            <div className="relative bg-white dark:bg-[#0f1829] border border-gray-200 dark:border-white/10 rounded-3xl p-8 overflow-hidden shadow-xl dark:shadow-none">
+            <div className="relative bg-white dark:bg-[#0f1829] border-2 border-gray-300 dark:border-white/10 rounded-3xl p-8 overflow-hidden shadow-xl dark:shadow-none">
               <div className="grid md:grid-cols-3 gap-6 mb-6">
                 {[
-                  { label: 'ATS Score', value: '87%', color: 'text-green-500 dark:text-green-400', icon: 'speed' },
-                  { label: 'Job Match', value: '92%', color: 'text-blue-600 dark:text-primary', icon: 'work' },
-                  { label: 'Keywords', value: '24', color: 'text-purple-600 dark:text-purple-400', icon: 'label' },
+                  { label: 'ATS Score', value: '87%', lightColor: '#16a34a', darkColor: '#4ade80', icon: 'speed' },
+                  { label: 'Job Match', value: '92%', lightColor: '#2563eb', darkColor: '#c0c1ff', icon: 'work' },
+                  { label: 'Keywords', value: '24', lightColor: '#000000', darkColor: '#c084fc', icon: 'label' },
                 ].map((stat, i) => (
-                  <div key={i} className="bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-6">
+                  <div key={i} className="bg-gray-50 dark:bg-white/5 border-2 border-gray-300 dark:border-white/10 rounded-2xl p-6 hover:border-gray-400 dark:hover:border-white/20 hover:shadow-lg transition-all">
                     <div className="flex items-center justify-between mb-3">
-                      <span className="text-sm text-gray-500 dark:text-[#8892a4]">{stat.label}</span>
-                      <span className={`material-symbols-outlined text-sm ${stat.color}`}>{stat.icon}</span>
+                      <span className="text-sm font-medium text-gray-700 dark:text-[#8892a4]">{stat.label}</span>
+                      <span className="material-symbols-outlined text-sm" style={{ color: dark ? stat.darkColor : stat.lightColor }}>{stat.icon}</span>
                     </div>
-                    <p className={`text-3xl font-extrabold font-headline ${stat.color}`}>{stat.value}</p>
+                    <p className="text-3xl font-extrabold font-headline" style={{ color: dark ? stat.darkColor : stat.lightColor }}>{stat.value}</p>
                   </div>
                 ))}
               </div>
 
-              <div className="bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-6">
+              <div className="bg-gray-50 dark:bg-white/5 border-2 border-gray-300 dark:border-white/10 rounded-2xl p-6">
                 <h3 className="text-sm font-bold text-gray-900 dark:text-[#dae2fd] mb-4">Score Breakdown</h3>
                 <div className="space-y-3">
                   {[
@@ -298,7 +297,7 @@ export default function Landing() {
                     { label: 'Skills', value: 90 },
                   ].map((item, i) => (
                     <div key={i}>
-                      <div className="flex justify-between text-xs text-gray-500 dark:text-[#8892a4] mb-1">
+                      <div className="flex justify-between text-xs font-medium text-gray-700 dark:text-[#8892a4] mb-1">
                         <span>{item.label}</span>
                         <span>{item.value}%</span>
                       </div>
@@ -329,25 +328,25 @@ export default function Landing() {
               { title: 'Senior React Developer', company: 'TechCorp Inc', location: 'Remote', salary: '₹18L - ₹25L', match: 85, missing: ['Kubernetes', 'AWS'] },
               { title: 'Full Stack Engineer', company: 'StartupXYZ', location: 'Bangalore', salary: '₹12L - ₹18L', match: 72, missing: ['Docker', 'GraphQL'] },
             ].map((job, i) => (
-              <div key={i} className="bg-white dark:bg-[#0f1829] border border-gray-200 dark:border-white/10 rounded-2xl p-6 hover:border-blue-300 dark:hover:border-primary/30 shadow-sm hover:shadow-md dark:shadow-none transition-all group">
+              <div key={i} className="bg-white dark:bg-[#0f1829] border-2 border-gray-300 dark:border-white/10 rounded-2xl p-6 hover:border-blue-400 dark:hover:border-primary/30 shadow-md hover:shadow-xl dark:shadow-none dark:hover:shadow-lg transition-all group">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
                     <h3 className="text-lg font-bold text-gray-900 dark:text-[#dae2fd] mb-1 group-hover:text-blue-600 dark:group-hover:text-primary transition-colors">{job.title}</h3>
-                    <p className="text-sm text-gray-500 dark:text-[#8892a4] flex items-center gap-1">
+                    <p className="text-sm font-medium text-gray-600 dark:text-[#8892a4] flex items-center gap-1">
                       <span className="material-symbols-outlined text-xs">business</span>
                       {job.company}
                     </p>
                   </div>
                   <span className={`px-3 py-1 rounded-lg text-sm font-bold ${
                     job.match >= 80
-                      ? 'bg-green-50 dark:bg-green-400/10 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-400/20'
-                      : 'bg-blue-50 dark:bg-primary/10 text-blue-600 dark:text-primary border border-blue-200 dark:border-primary/20'
+                      ? 'bg-green-50 dark:bg-green-400/10 text-green-600 dark:text-green-400 border-2 border-green-300 dark:border-green-400/20'
+                      : 'bg-blue-50 dark:bg-primary/10 text-blue-600 dark:text-primary border-2 border-blue-300 dark:border-primary/20'
                   }`}>
                     {job.match}% Match
                   </span>
                 </div>
 
-                <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-[#8892a4] mb-4">
+                <div className="flex items-center gap-4 text-xs font-medium text-gray-600 dark:text-[#8892a4] mb-4">
                   <span className="flex items-center gap-1">
                     <span className="material-symbols-outlined text-xs">location_on</span>
                     {job.location}
@@ -359,17 +358,17 @@ export default function Landing() {
                 </div>
 
                 <div className="mb-4">
-                  <p className="text-xs text-gray-500 dark:text-[#8892a4] mb-2">Skills to improve:</p>
+                  <p className="text-xs font-semibold text-gray-700 dark:text-[#8892a4] mb-2">Skills to improve:</p>
                   <div className="flex flex-wrap gap-2">
                     {job.missing.map((skill, j) => (
-                      <span key={j} className="px-2 py-1 bg-red-50 dark:bg-red-400/10 border border-red-200 dark:border-red-400/20 text-red-500 dark:text-red-400 text-xs rounded-lg">
+                      <span key={j} className="px-2 py-1 bg-red-50 dark:bg-red-400/10 border-2 border-red-300 dark:border-red-400/20 text-red-600 dark:text-red-400 text-xs font-semibold rounded-lg">
                         {skill}
                       </span>
                     ))}
                   </div>
                 </div>
 
-                <button className="w-full py-2 bg-blue-50 dark:bg-primary/10 border border-blue-200 dark:border-primary/20 text-blue-600 dark:text-primary text-sm font-bold rounded-xl hover:bg-blue-100 dark:hover:bg-primary/20 transition-all">
+                <button className="w-full py-2 bg-blue-50 dark:bg-primary/10 border-2 border-blue-300 dark:border-primary/20 text-blue-600 dark:text-primary text-sm font-bold rounded-xl hover:bg-blue-100 dark:hover:bg-primary/20 hover:shadow-lg transition-all">
                   View Details
                 </button>
               </div>
@@ -388,21 +387,21 @@ export default function Landing() {
             </h2>
           </div>
 
-          <div className="bg-white dark:bg-[#0f1829] border border-gray-200 dark:border-white/10 rounded-3xl p-8 shadow-xl dark:shadow-none">
+          <div className="bg-white dark:bg-[#0f1829] border-2 border-gray-300 dark:border-white/10 rounded-3xl p-8 shadow-xl dark:shadow-none">
             <div className="space-y-4">
               {[
                 'Tell me about your experience with React and modern JavaScript frameworks.',
                 'How do you handle state management in large-scale applications?',
                 'Describe a challenging project you worked on and how you overcame obstacles.',
               ].map((question, i) => (
-                <div key={i} className="bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-6 hover:border-blue-300 dark:hover:border-primary/30 transition-all group">
+                <div key={i} className="bg-gray-50 dark:bg-white/5 border-2 border-gray-300 dark:border-white/10 rounded-2xl p-6 hover:border-blue-400 dark:hover:border-primary/30 hover:shadow-lg dark:hover:shadow-md transition-all group">
                   <div className="flex items-start gap-4">
-                    <div className="w-8 h-8 bg-blue-100 dark:bg-primary/20 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-blue-200 dark:group-hover:bg-primary/30 transition-colors">
+                    <div className="w-8 h-8 bg-blue-100 dark:bg-primary/20 border-2 border-blue-300 dark:border-primary/30 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-blue-200 dark:group-hover:bg-primary/30 transition-colors shadow-sm">
                       <span className="text-xs font-bold text-blue-600 dark:text-primary">Q{i + 1}</span>
                     </div>
                     <div className="flex-1">
-                      <p className="text-gray-800 dark:text-[#dae2fd] mb-3">{question}</p>
-                      <button className="text-xs text-blue-600 dark:text-primary hover:underline flex items-center gap-1">
+                      <p className="text-gray-800 dark:text-[#dae2fd] mb-3 font-medium">{question}</p>
+                      <button className="text-xs font-semibold text-blue-600 dark:text-primary hover:underline flex items-center gap-1">
                         <span className="material-symbols-outlined text-sm">auto_awesome</span>
                         Get AI Answer
                       </button>
@@ -427,7 +426,7 @@ export default function Landing() {
                 <span className="text-primary">Resume Today</span>
               </h2>
               <p className="text-lg text-gray-500 dark:text-[#8892a4] mb-8 max-w-2xl mx-auto">
-                Join thousands of job seekers who have successfully landed their dream jobs with ResumeAI
+                Join thousands of job seekers who have successfully landed their dream jobs with Resumate
               </p>
               <button onClick={() => navigate('/register')} className="group px-10 py-4 bg-gradient-to-r from-primary to-primary-container text-[#0b1120] font-bold rounded-2xl hover:scale-105 transition-all inline-flex items-center gap-2">
                 Try Now - It&apos;s Free
@@ -448,10 +447,10 @@ export default function Landing() {
                 <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary-container rounded-lg flex items-center justify-center">
                   <span className="material-symbols-outlined text-[#0b1120] text-lg">description</span>
                 </div>
-                <span className="text-xl font-bold font-headline text-gray-900 dark:text-white">ResumeAI</span>
+                <span className="text-xl font-bold font-headline text-gray-900 dark:text-white">Resumate</span>
               </div>
               <p className="text-sm text-gray-500 dark:text-[#8892a4]">
-                AI-powered resume analysis to help you land your dream job.
+              AI-powered resume analysis to help you land your dream job.
               </p>
             </div>
 
@@ -474,7 +473,7 @@ export default function Landing() {
           </div>
 
           <div className="pt-8 border-t border-gray-200 dark:border-white/5 flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-sm text-gray-500 dark:text-[#8892a4]">© 2024 ResumeAI. All rights reserved.</p>
+            <p className="text-sm text-gray-500 dark:text-[#8892a4]">© 2024 Resumate. All rights reserved.</p>
             <div className="flex items-center gap-4">
               {['twitter', 'linkedin', 'github'].map((social, i) => (
                 <a key={i} href="#" className="w-8 h-8 bg-gray-100 dark:bg-white/5 rounded-lg flex items-center justify-center text-gray-500 dark:text-[#8892a4] hover:text-blue-600 dark:hover:text-primary hover:bg-gray-200 dark:hover:bg-white/10 transition-all">

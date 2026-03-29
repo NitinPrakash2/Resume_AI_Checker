@@ -150,7 +150,7 @@ export default function Home() {
   const quickActions = [
     { Icon: Upload,        label: 'Upload Resume',  sub: 'Analyze a new resume',  to: '/upload',     iconBg: 'bg-blue-100 dark:bg-[#c0c1ff]/10', iconText: 'text-blue-600 dark:text-[#c0c1ff]' },
     { Icon: Briefcase,     label: 'Browse Jobs',    sub: 'Track applications',     to: '/jobs',       iconBg: 'bg-teal-100 dark:bg-blue-400/10',  iconText: 'text-teal-600 dark:text-blue-400' },
-    { Icon: MessageSquare, label: 'Interview Prep', sub: 'Practice questions',     to: '/interviews', iconBg: 'bg-purple-100 dark:bg-teal-500/10',iconText: 'text-purple-600 dark:text-teal-500' },
+    { Icon: MessageSquare, label: 'Interview Prep', sub: 'Practice questions',     to: '/interviews', iconBg: 'bg-indigo-100 dark:bg-teal-500/10',iconText: 'text-indigo-700 dark:text-teal-500' },
     { Icon: BarChart3,     label: 'View Analysis',  sub: 'See latest results',     to: '/result',     iconBg: 'bg-emerald-100 dark:bg-green-400/10', iconText: 'text-emerald-600 dark:text-green-400' },
   ]
 

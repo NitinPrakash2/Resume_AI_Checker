@@ -55,7 +55,7 @@ export default function Register() {
             <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary-container rounded-lg flex items-center justify-center">
               <span className="material-symbols-outlined text-[#0b1120]">description</span>
             </div>
-            <span className="text-2xl font-bold font-headline text-gray-900 dark:text-white">ResumeAI</span>
+            <span className="text-2xl font-bold font-headline text-gray-900 dark:text-white">Resumate</span>
           </Link>
           <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white font-headline mb-2">Create Account</h1>
           <p className="text-gray-500 dark:text-[#8892a4]">Start optimizing your resume with AI</p>

@@ -2,13 +2,16 @@ const Groq = require('groq-sdk')
 const PROMPTS = require('./prompts')
 
 function parseJSON(text) {
-  return JSON.parse(
-    text.trim()
-      .replace(/^```json\s*/i, '')
-      .replace(/^```\s*/i, '')
-      .replace(/\s*```$/i, '')
-      .trim()
-  )
+  let clean = text.trim()
+    .replace(/^```json\s*/i, '')
+    .replace(/^```\s*/i, '')
+    .replace(/\s*```$/i, '')
+    .trim()
+  const start = clean.indexOf('{')
+  const end = clean.lastIndexOf('}')
+  if (start !== -1 && end !== -1 && end > start) clean = clean.slice(start, end + 1)
+  clean = clean.replace(/,\s*([}\]])/g, '$1')
+  return JSON.parse(clean)
 }
 
 async function generate(prompt, apiKey) {
@@ -31,4 +34,5 @@ module.exports = {
   generateInterviewQuestions: (text, jd, key) => generate(PROMPTS.generateInterviewQuestions(text, jd), key),
   rewriteResume:              (text, jd, key) => generate(PROMPTS.rewriteResume(text, jd), key),
   getAIAnswer:                (q, ctx, key)   => generate(PROMPTS.getAIAnswer(q, ctx), key),
+  generate:                   (prompt, key)   => generate(prompt, key),
 }

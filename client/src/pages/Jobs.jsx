@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getJobs, createJob, updateJob, deleteJob, searchJobs, getAISuggestedJobs, getLatestResumeId, getHistory } from '../services/resumeService'
+import { getJobs, createJob, updateJob, deleteJob, searchJobs, getLatestResumeId, getHistory } from '../services/resumeService'
 import ConfirmDialog from '../components/ConfirmDialog'
 
 const STATUS = {
@@ -182,22 +182,7 @@ export default function Jobs() {
   const loadMatchedJobs = async () => {
     setLoadingMatches(true)
     try {
-      // 1. Try getting latest resume ID from DB
-      let resumeId = await getLatestResumeId()
-
-      // 2. Fallback: use most recent resume from history
-      if (!resumeId) {
-        const hist = await getHistory()
-        if (hist && hist.length > 0) resumeId = hist[0].id
-      }
-
-      if (!resumeId) {
-        setMatchedJobs([])
-        return
-      }
-
-      const results = await getAISuggestedJobs(resumeId)
-      setMatchedJobs(Array.isArray(results) && results.length > 0 ? results : [])
+      setMatchedJobs([])
     } catch {
       setMatchedJobs([])
     } finally {

@@ -54,4 +54,5 @@ module.exports = {
   generateInterviewQuestions: (text, jd, key) => generate(PROMPTS.generateInterviewQuestions(text, jd), key),
   rewriteResume:              (text, jd, key) => generate(PROMPTS.rewriteResume(text, jd), key),
   getAIAnswer:                (q, ctx, key)   => generate(PROMPTS.getAIAnswer(q, ctx), key),
+  generate:                   (prompt, key)   => generate(prompt, key),
 }

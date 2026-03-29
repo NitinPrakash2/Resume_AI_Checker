@@ -3,18 +3,24 @@ const axios = require('axios')
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions'
 
 function parseJSON(text) {
-  const clean = text.trim()
+  let clean = text.trim()
     .replace(/^```json\s*/i, '')
     .replace(/^```\s*/i, '')
     .replace(/\s*```$/i, '')
     .trim()
+  const start = clean.indexOf('{')
+  const end = clean.lastIndexOf('}')
+  if (start !== -1 && end !== -1 && end > start) {
+    clean = clean.slice(start, end + 1)
+  }
+  clean = clean.replace(/,\s*([}\]])/g, '$1')
   return JSON.parse(clean)
 }
 
 async function generate(prompt, apiKey, model) {
   const key = apiKey || process.env.OPENROUTER_API_KEY
   if (!key) throw new Error('No OpenRouter API key. Add your key in Settings.')
-  const mdl = model || process.env.OPENROUTER_MODEL || 'openrouter/free'
+  const mdl = model || process.env.OPENROUTER_MODEL || 'openrouter/auto'
 
   const maxRetries = 3
   for (let i = 0; i < maxRetries; i++) {
@@ -54,4 +60,5 @@ module.exports = {
   generateInterviewQuestions: (text, jd, key, model) => generate(PROMPTS.generateInterviewQuestions(text, jd), key, model),
   rewriteResume:              (text, jd, key, model) => generate(PROMPTS.rewriteResume(text, jd), key, model),
   getAIAnswer:                (q, ctx, key, model)   => generate(PROMPTS.getAIAnswer(q, ctx), key, model),
+  generate:                   (prompt, key, model)   => generate(prompt, key, model),
 }
