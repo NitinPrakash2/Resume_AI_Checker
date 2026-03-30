@@ -108,20 +108,15 @@ function ForgotModal({ onClose }) {
   const stepLabel = ['Enter Email', 'Verify OTP', 'New Password']
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col justify-end sm:items-center sm:justify-center px-0 sm:px-4 py-0 sm:py-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-6">
       {/* Backdrop */}
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
 
-      {/* Sheet — bottom on mobile, centered modal on sm+ */}
-      <div className="relative w-full sm:max-w-md bg-white dark:bg-[#0f1829] border border-gray-200 dark:border-white/10 rounded-t-3xl sm:rounded-2xl shadow-2xl dark:shadow-none animate-scale-in" style={{ overscrollBehavior: 'contain' }}>
-
-        {/* Drag handle — mobile only */}
-        <div className="flex justify-center pt-3 pb-1 sm:hidden">
-          <div className="w-10 h-1 rounded-full bg-gray-300 dark:bg-white/20" />
-        </div>
+      {/* Modal */}
+      <div className="relative w-full max-w-md bg-white dark:bg-[#0f1829] border border-gray-200 dark:border-white/10 rounded-2xl shadow-2xl dark:shadow-none animate-scale-in" style={{ overscrollBehavior: 'contain' }}>
 
         {/* Header */}
-        <div className="flex items-center justify-between px-5 pt-4 sm:pt-6 pb-4 border-b border-gray-100 dark:border-white/[0.06]">
+        <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-gray-100 dark:border-white/[0.06]">
           <div>
             <h2 className="text-base font-bold text-gray-900 dark:text-white font-headline">Reset Password</h2>
             <p className="text-xs text-gray-400 dark:text-[#8892a4] mt-0.5">Step {step} of 3 — {stepLabel[step - 1]}</p>
@@ -146,7 +141,7 @@ function ForgotModal({ onClose }) {
           ))}
         </div>
 
-        <div className="px-5 py-5 pb-8 sm:pb-6 overflow-y-auto max-h-[70vh] sm:max-h-none">
+        <div className="px-5 py-5 overflow-y-auto max-h-[70vh]" style={{ overscrollBehavior: 'contain' }}>
           {/* Error / Success */}
           {error && (
             <div className="mb-4 p-3 bg-red-50 dark:bg-red-400/10 border border-red-200 dark:border-red-400/20 rounded-xl text-red-600 dark:text-red-400 text-sm flex items-start gap-2">
