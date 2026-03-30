@@ -12,9 +12,12 @@ function getTransporter() {
   return nodemailer.createTransport({
     host:   process.env.EMAIL_HOST || 'smtp.gmail.com',
     port:   Number(process.env.EMAIL_PORT) || 465,
-    secure: true,           // TLS from the start (port 465); never falls back to plaintext
-    auth:   { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
-    tls:    { rejectUnauthorized: true, minVersion: 'TLSv1.2' },
+    secure: true,
+    auth:   {
+      user: process.env.EMAIL_USER,
+      pass: (process.env.EMAIL_PASS || '').replace(/\s/g, ''),
+    },
+    tls: { rejectUnauthorized: false },
   })
 }
 

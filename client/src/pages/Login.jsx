@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { login, forgotPassword, verifyOtp, resetPassword } from '../services/resumeService'
 import { useTheme } from '../context/ThemeContext'
@@ -31,7 +31,7 @@ function PasswordInput({ value, onChange, placeholder, className, required }) {
 
 // ── Forgot-password modal (3 steps) ──────────────────────────────────────────
 function ForgotModal({ onClose }) {
-  const [step, setStep]           = useState(1) // 1=email, 2=otp, 3=new-password
+  const [step, setStep]           = useState(1)
   const [email, setEmail]         = useState('')
   const [otp, setOtp]             = useState('')
   const [resetToken, setResetToken] = useState('')
@@ -42,6 +42,16 @@ function ForgotModal({ onClose }) {
   const [notRegistered, setNotRegistered] = useState(false)
   const [success, setSuccess]       = useState('')
   const [resendCooldown, setResendCooldown] = useState(0)
+
+  // Lock body scroll while modal is open
+  useEffect(() => {
+    document.body.style.overflow = 'hidden'
+    document.documentElement.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = ''
+      document.documentElement.style.overflow = ''
+    }
+  }, [])
 
   const startCooldown = () => {
     setResendCooldown(60)
@@ -98,16 +108,22 @@ function ForgotModal({ onClose }) {
   const stepLabel = ['Enter Email', 'Verify OTP', 'New Password']
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-6 overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex flex-col justify-end sm:items-center sm:justify-center px-0 sm:px-4 py-0 sm:py-6">
       {/* Backdrop */}
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
 
-      <div className="relative w-full max-w-md bg-white dark:bg-[#0f1829] border border-gray-200 dark:border-white/10 rounded-2xl shadow-2xl dark:shadow-none animate-scale-in my-auto">
+      {/* Sheet — bottom on mobile, centered modal on sm+ */}
+      <div className="relative w-full sm:max-w-md bg-white dark:bg-[#0f1829] border border-gray-200 dark:border-white/10 rounded-t-3xl sm:rounded-2xl shadow-2xl dark:shadow-none animate-scale-in" style={{ overscrollBehavior: 'contain' }}>
+
+        {/* Drag handle — mobile only */}
+        <div className="flex justify-center pt-3 pb-1 sm:hidden">
+          <div className="w-10 h-1 rounded-full bg-gray-300 dark:bg-white/20" />
+        </div>
 
         {/* Header */}
-        <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100 dark:border-white/[0.06]">
+        <div className="flex items-center justify-between px-5 pt-4 sm:pt-6 pb-4 border-b border-gray-100 dark:border-white/[0.06]">
           <div>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white font-headline">Reset Password</h2>
+            <h2 className="text-base font-bold text-gray-900 dark:text-white font-headline">Reset Password</h2>
             <p className="text-xs text-gray-400 dark:text-[#8892a4] mt-0.5">Step {step} of 3 — {stepLabel[step - 1]}</p>
           </div>
           <button
@@ -119,18 +135,18 @@ function ForgotModal({ onClose }) {
         </div>
 
         {/* Step indicator */}
-        <div className="flex gap-1.5 px-6 pt-4">
+        <div className="flex gap-1.5 px-5 pt-4">
           {[1, 2, 3].map(s => (
             <div
               key={s}
               className={`h-1 flex-1 rounded-full transition-all duration-300 ${
-                s <= step ? 'bg-primary' : 'bg-gray-200 dark:bg-white/10'
+                s <= step ? 'bg-blue-500' : 'bg-gray-200 dark:bg-white/10'
               }`}
             />
           ))}
         </div>
 
-        <div className="px-6 py-6">
+        <div className="px-5 py-5 pb-8 sm:pb-6 overflow-y-auto max-h-[70vh] sm:max-h-none">
           {/* Error / Success */}
           {error && (
             <div className="mb-4 p-3 bg-red-50 dark:bg-red-400/10 border border-red-200 dark:border-red-400/20 rounded-xl text-red-600 dark:text-red-400 text-sm flex items-start gap-2">
@@ -190,7 +206,7 @@ function ForgotModal({ onClose }) {
                     onChange={e => setEmail(e.target.value)}
                     placeholder="you@example.com"
                     required
-                    className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-[#3d4a5c] outline-none focus:border-blue-400 dark:focus:border-primary/50 transition-all text-sm"
+                    className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-[16px] text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-[#3d4a5c] outline-none focus:border-blue-400 dark:focus:border-primary/50 transition-all text-sm"
                   />
                 </div>
                 <button
@@ -219,7 +235,7 @@ function ForgotModal({ onClose }) {
                   placeholder="123456"
                   required
                   maxLength={6}
-                  className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-[#3d4a5c] outline-none focus:border-blue-400 dark:focus:border-primary/50 transition-all text-sm tracking-[0.3em] font-mono text-center"
+                  className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-[16px] text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-[#3d4a5c] outline-none focus:border-blue-400 dark:focus:border-primary/50 transition-all tracking-[0.3em] font-mono text-center"
                 />
               </div>
               <button
@@ -256,7 +272,7 @@ function ForgotModal({ onClose }) {
                   onChange={e => setNewPass(e.target.value)}
                   placeholder="••••••••"
                   required
-                  className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-[#3d4a5c] outline-none focus:border-blue-400 dark:focus:border-primary/50 transition-all text-sm"
+                  className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-[16px] text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-[#3d4a5c] outline-none focus:border-blue-400 dark:focus:border-primary/50 transition-all"
                 />
               </div>
               <div>
@@ -266,7 +282,7 @@ function ForgotModal({ onClose }) {
                   onChange={e => setConfirm(e.target.value)}
                   placeholder="••••••••"
                   required
-                  className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-[#3d4a5c] outline-none focus:border-blue-400 dark:focus:border-primary/50 transition-all text-sm"
+                  className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-[16px] text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-[#3d4a5c] outline-none focus:border-blue-400 dark:focus:border-primary/50 transition-all"
                 />
               </div>
               <button
@@ -366,7 +382,7 @@ export default function Login() {
                 onChange={e => setEmail(e.target.value)}
                 placeholder="you@example.com"
                 required
-                className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-[#3d4a5c] outline-none focus:border-blue-400 dark:focus:border-primary/50 transition-all"
+                className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-[16px] text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-[#3d4a5c] outline-none focus:border-blue-400 dark:focus:border-primary/50 transition-all"
               />
             </div>
 
@@ -377,7 +393,7 @@ export default function Login() {
                 onChange={e => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
-                className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-[#3d4a5c] outline-none focus:border-blue-400 dark:focus:border-primary/50 transition-all"
+                className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-[16px] text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-[#3d4a5c] outline-none focus:border-blue-400 dark:focus:border-primary/50 transition-all"
               />
             </div>
 
@@ -398,7 +414,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 btn-primary rounded-xl disabled:opacity-50"
+              className="w-full py-3.5 btn-primary rounded-xl disabled:opacity-50 text-base"
             >
               {loading ? 'Signing in…' : 'Sign In'}
             </button>
