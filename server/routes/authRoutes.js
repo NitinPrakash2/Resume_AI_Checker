@@ -8,6 +8,7 @@ router.get('/saved-keys',          auth, getSavedKeys)
 router.post('/saved-keys',         verifyCsrf, auth, saveApiKey)
 router.delete('/saved-keys/:keyId',verifyCsrf, auth, deleteSavedKey)
 
+router.post('/register',        verifyCsrf, register)
 router.post('/login',           verifyCsrf, login)
 router.get('/me',               auth, getMe)
 router.get('/latest-resume',    auth, getLatestResume)
