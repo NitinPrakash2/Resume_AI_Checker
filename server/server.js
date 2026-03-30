@@ -10,8 +10,15 @@ const uploadsDir = path.join(__dirname, 'uploads')
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir)
 
 const app = express()
-const ALLOWED_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:3000'
-app.use(cors({ origin: ALLOWED_ORIGIN, credentials: true }))
+const ALLOWED_ORIGINS = [
+  'http://localhost:3000',
+  'https://resume-ai-checker-two.vercel.app',
+  ...(process.env.CLIENT_ORIGIN ? [process.env.CLIENT_ORIGIN] : []),
+]
+app.use(cors({
+  origin: (origin, cb) => cb(null, !origin || ALLOWED_ORIGINS.includes(origin)),
+  credentials: true,
+}))
 app.use(express.json())
 
 const PORT = process.env.PORT || 5000
