@@ -110,7 +110,7 @@ function ATSGauge({ score }) {
         </div>
       </div>
       <p className="text-xs font-bold" style={{ color }}>{label}</p>
-      <p className="text-[10px] text-[#6b7a94]">ATS Score</p>
+      <p className="text-[10px] text-[#6b7a94]">Est. ATS Score</p>
     </div>
   )
 }
@@ -144,7 +144,7 @@ export default function Home() {
     { Icon: FileText,  label: 'Resumes Analyzed', value: history.length,  sub: history.length > 0 ? 'Total uploads' : null,      colorClass: 'text-blue-600 dark:text-[#c0c1ff]', iconBg: 'bg-blue-100 dark:bg-[#c0c1ff]/10', iconText: 'text-blue-600 dark:text-[#c0c1ff]', accentColor: '#2563eb', glowClass: 'stat-card-primary' },
     { Icon: BarChart3, label: 'Avg Match Score',  value: `${avgScore}%`,  sub: avgScore > 0 ? 'Across all resumes' : null,         colorClass: 'text-teal-600 dark:text-blue-400',  iconBg: 'bg-teal-100 dark:bg-blue-400/10',  iconText: 'text-teal-600 dark:text-blue-400',  accentColor: '#0d9488', glowClass: 'stat-card-blue' },
     { Icon: Trophy,    label: 'Best Score',       value: `${best}%`,      sub: best > 0 ? 'Personal best' : null,                  colorClass: 'text-amber-600 dark:text-yellow-400',iconBg: 'bg-amber-100 dark:bg-yellow-400/10',iconText: 'text-amber-600 dark:text-yellow-400',accentColor: '#d97706', glowClass: 'stat-card-yellow' },
-    { Icon: Gauge,     label: 'Avg ATS Score',    value: avgAts || 0,     sub: avgAts > 0 ? 'ATS readability' : null,              colorClass: 'text-emerald-600 dark:text-green-400', iconBg: 'bg-emerald-100 dark:bg-green-400/10', iconText: 'text-emerald-600 dark:text-green-400', accentColor: '#059669', glowClass: 'stat-card-green' },
+    { Icon: Gauge,     label: 'Avg Est. ATS Score', value: avgAts || 0,     sub: avgAts > 0 ? 'ATS readability' : null,              colorClass: 'text-emerald-600 dark:text-green-400', iconBg: 'bg-emerald-100 dark:bg-green-400/10', iconText: 'text-emerald-600 dark:text-green-400', accentColor: '#059669', glowClass: 'stat-card-green' },
   ]
 
   const quickActions = [
@@ -165,7 +165,7 @@ export default function Home() {
         </div>
         <button
           onClick={() => navigate('/upload')}
-          className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-500 dark:from-[#c0c1ff] dark:to-[#8083ff] text-white dark:text-[#0b1120] text-sm font-bold rounded-xl hover:brightness-110 active:scale-95 transition-all self-start sm:self-auto"
+          className="flex items-center gap-2 px-4 py-2.5 btn-primary text-sm rounded-xl active:scale-95 self-start sm:self-auto"
         >
           <Plus className="w-4 h-4" />
           New Analysis
@@ -213,7 +213,7 @@ export default function Home() {
           {/* card header */}
           <div className="flex items-center gap-2">
             <Gauge className="w-4 h-4 text-emerald-600 dark:text-green-400" />
-            <p className="text-sm font-bold text-gray-900 dark:text-[#dae2fd]">ATS Score</p>
+            <p className="text-sm font-bold text-gray-900 dark:text-[#dae2fd]">Est. ATS Score</p>
           </div>
 
           {loading ? <Skeleton className="h-28" /> : (
@@ -345,7 +345,7 @@ export default function Home() {
           </div>
             <button
               onClick={() => navigate('/upload')}
-              className="flex-shrink-0 flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-blue-500 dark:from-[#c0c1ff] dark:to-[#8083ff] text-white dark:text-[#0b1120] text-sm font-bold rounded-xl hover:brightness-110 active:scale-95 transition-all shadow-sm"
+              className="flex-shrink-0 flex items-center gap-2 px-5 py-2.5 btn-primary text-sm rounded-xl active:scale-95 shadow-sm"
             >
             <Rocket className="w-4 h-4" />
             Start Free

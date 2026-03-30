@@ -118,7 +118,7 @@ const filtered = history.filter(r => r.fileName.toLowerCase().includes(search.to
         <div className="grid grid-cols-5 px-5 py-3 border-b border-gray-200 dark:border-white/5 text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-[#3d4a5c]">
           <span className="col-span-2">File</span>
           <span className="text-center">Match</span>
-          <span className="text-center">ATS</span>
+          <span className="text-center">Est. ATS</span>
           <span className="text-center">Actions</span>
         </div>
         {loading ? (

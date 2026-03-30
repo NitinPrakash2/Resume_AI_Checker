@@ -203,7 +203,7 @@ export default function Result() {
       </div>
       <p className="text-xl font-bold text-gray-900 dark:text-white mb-2">No Analysis Selected</p>
       <p className="text-sm text-gray-600 dark:text-slate-400 mb-8 max-w-md">Upload your resume to get AI-powered insights, ATS scoring, and personalized recommendations</p>
-      <button onClick={() => navigate('/upload')} className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-500 dark:from-[#A6ADFF] dark:to-[#8892FF] text-white dark:text-[#0B0F19] font-bold rounded-xl text-sm hover:shadow-lg hover:shadow-blue-600/20 dark:hover:shadow-[#A6ADFF]/20 transition-all hover:scale-105">
+      <button onClick={() => navigate('/upload')} className="px-6 py-3 btn-primary rounded-xl text-sm hover:scale-105">
         <span className="flex items-center gap-2">
           <span className="material-symbols-outlined text-lg">upload</span>
           Upload Resume
@@ -272,7 +272,7 @@ export default function Result() {
                 <p className="text-sm font-bold text-gray-900 dark:text-white mb-1">Resume Analyzed Successfully!</p>
                 <p className="text-xs text-gray-600 dark:text-slate-400 mb-4">We've found jobs that match your skills</p>
                 <button onClick={() => navigate('/jobs')}
-                  className="w-full py-2.5 bg-gradient-to-r from-blue-600 to-blue-500 dark:from-[#A6ADFF] dark:to-[#8892FF] text-white dark:text-[#0B0F19] text-sm font-bold rounded-xl hover:shadow-lg hover:shadow-blue-600/20 dark:hover:shadow-[#A6ADFF]/20 transition-all hover:scale-[1.02] flex items-center justify-center gap-2">
+                  className="w-full py-2.5 btn-primary text-sm rounded-xl hover:scale-[1.02] flex items-center justify-center gap-2">
                   <span className="material-symbols-outlined text-lg">work</span>
                   View Matched Jobs
                 </button>
@@ -309,7 +309,7 @@ export default function Result() {
           </div>
           <div className="flex flex-wrap gap-2 sm:gap-3">
             <button onClick={() => navigate('/jobs')}
-              className="flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 bg-gradient-to-r from-blue-600 to-blue-500 dark:from-[#A6ADFF] dark:to-[#8892FF] text-white dark:text-[#0B0F19] text-sm font-bold rounded-xl hover:shadow-lg hover:shadow-blue-600/20 dark:hover:shadow-[#A6ADFF]/20 transition-all hover:scale-105">
+              className="flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 btn-primary text-sm rounded-xl hover:scale-105">
               <span className="material-symbols-outlined text-lg">work</span>
               <span className="hidden sm:inline">View Matched Jobs</span>
               <span className="sm:hidden">Jobs</span>
@@ -327,7 +327,7 @@ export default function Result() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {[
             { label: 'Job Match Score', value: `${score}%`, icon: 'analytics', color: score >= 80 ? 'text-green-400' : score >= 60 ? 'text-blue-600 dark:text-[#A6ADFF]' : 'text-rose-400', bg: score >= 80 ? 'bg-green-400/10' : score >= 60 ? 'bg-blue-600/10 dark:bg-[#A6ADFF]/10' : 'bg-rose-400/10', glow: score >= 80 ? 'shadow-green-400/20' : score >= 60 ? 'shadow-blue-600/20 dark:shadow-[#A6ADFF]/20' : 'shadow-rose-400/20' },
-            { label: 'ATS Score', value: `${atsScore}`, icon: 'speed', color: atsScore >= 80 ? 'text-green-400' : 'text-yellow-400', bg: atsScore >= 80 ? 'bg-green-400/10' : 'bg-yellow-400/10', glow: atsScore >= 80 ? 'shadow-green-400/20' : 'shadow-yellow-400/20' },
+            { label: 'Est. ATS Score', value: `${atsScore}`, icon: 'speed', color: atsScore >= 80 ? 'text-green-400' : 'text-yellow-400', bg: atsScore >= 80 ? 'bg-green-400/10' : 'bg-yellow-400/10', glow: atsScore >= 80 ? 'shadow-green-400/20' : 'shadow-yellow-400/20' },
             { label: 'Keywords Found', value: keywords.length, icon: 'tag', color: 'text-blue-400', bg: 'bg-blue-400/10', glow: 'shadow-blue-400/20' },
             { label: 'Skill Gaps', value: missing.length, icon: 'warning', color: 'text-orange-400', bg: 'bg-orange-400/10', glow: 'shadow-orange-400/20' },
           ].map(({ label, value, icon, color, bg, glow }) => (
@@ -350,7 +350,7 @@ export default function Result() {
             <button key={t} onClick={() => setTab(i)}
               className={`px-3 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap flex-1 sm:flex-none ${
                 tab === i 
-                  ? 'bg-gradient-to-r from-blue-600 to-blue-500 dark:from-[#A6ADFF] dark:to-[#8892FF] text-white dark:text-[#0B0F19] shadow-lg shadow-blue-600/20 dark:shadow-[#A6ADFF]/20' 
+                  ? 'btn-primary shadow-lg' 
                   : 'text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5'
               }`}>
               {t}
@@ -382,7 +382,7 @@ export default function Result() {
                 </div>
                 <div className="space-y-4">
                   {[
-                    { label: 'Overall ATS Score', val: atsScore },
+                  { label: 'Overall Est. ATS Score', val: atsScore },
                     { label: 'Keyword Density', val: Math.min(atsScore + 4, 100) },
                     { label: 'Format Score', val: Math.max(atsScore - 5, 0) },
                     { label: 'Readability', val: Math.min(atsScore + 8, 100) },
@@ -470,7 +470,7 @@ export default function Result() {
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
                 {[
-                  { label: 'ATS Score', val: atsScore, color: 'text-[#A6ADFF]', bg: 'bg-[#A6ADFF]/10', icon: 'speed' },
+                  { label: 'Est. ATS Score', val: atsScore, color: 'text-[#A6ADFF]', bg: 'bg-[#A6ADFF]/10', icon: 'speed' },
                   { label: 'Keywords', val: Math.min(atsScore + 4, 100), color: 'text-green-400', bg: 'bg-green-400/10', icon: 'tag' },
                   { label: 'Formatting', val: Math.max(atsScore - 5, 0), color: 'text-yellow-400', bg: 'bg-yellow-400/10', icon: 'format_align_left' },
                   { label: 'Readability', val: Math.min(atsScore + 8, 100), color: 'text-blue-400', bg: 'bg-blue-400/10', icon: 'visibility' },

@@ -59,6 +59,11 @@ export default function Layout() {
     })
   }, [])
 
+  useEffect(() => {
+    document.body.style.overflow = sidebarOpen ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [sidebarOpen])
+
   const handleLogout = () => {
     logout()
     navigate('/')
@@ -69,13 +74,13 @@ export default function Layout() {
   return (
     <div className="flex min-h-screen bg-gray-50 dark:bg-[#070d1a] font-body transition-colors duration-200">
 
-      {/* Mobile overlay with blur */}
-      <div
-        className={`fixed inset-0 z-40 lg:hidden transition-all duration-300 ${
-          sidebarOpen ? 'bg-black/50 backdrop-blur-sm pointer-events-auto' : 'bg-transparent backdrop-blur-none pointer-events-none'
-        }`}
-        onClick={() => setSidebarOpen(false)}
-      />
+      {/* Mobile overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 lg:hidden bg-black/50 backdrop-blur-sm"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
 
       {/* Sidebar */}
       <aside className={`fixed left-0 top-0 h-full w-60 flex flex-col z-50 border-r border-gray-200 dark:border-white/5

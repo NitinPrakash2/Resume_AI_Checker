@@ -4,11 +4,11 @@ import { getJobs, createJob, updateJob, deleteJob, searchJobs, getHistory, getAI
 import ConfirmDialog from '../components/ConfirmDialog'
 
 const STATUS = {
-  saved:        { label: 'Saved',        color: 'text-[#8892a4]', bg: 'bg-[#8892a4]/10', border: 'border-[#8892a4]/20', dot: 'bg-[#8892a4]' },
-  applied:      { label: 'Applied',      color: 'text-primary',   bg: 'bg-primary/10',    border: 'border-primary/20',   dot: 'bg-primary' },
-  interviewing: { label: 'Interviewing', color: 'text-purple-400', bg: 'bg-purple-400/10', border: 'border-purple-400/20', dot: 'bg-purple-400' },
-  offer:        { label: 'Offer',        color: 'text-green-400', bg: 'bg-green-400/10',  border: 'border-green-400/20', dot: 'bg-green-400' },
-  rejected:     { label: 'Rejected',     color: 'text-red-400',   bg: 'bg-red-400/10',    border: 'border-red-400/20',   dot: 'bg-red-400' },
+  saved:        { label: 'Saved',        color: 'text-slate-400',  bg: 'bg-slate-400/10',   border: 'border-slate-400/20',   dot: 'bg-slate-400',   icon: 'bookmark',          accent: '#94a3b8' },
+  applied:      { label: 'Applied',      color: 'text-blue-400',   bg: 'bg-blue-400/10',    border: 'border-blue-400/20',    dot: 'bg-blue-400',    icon: 'send',              accent: '#60a5fa' },
+  interviewing: { label: 'Interviewing', color: 'text-violet-400', bg: 'bg-violet-400/10',  border: 'border-violet-400/20',  dot: 'bg-violet-400',  icon: 'record_voice_over', accent: '#a78bfa' },
+  offer:        { label: 'Offer',        color: 'text-emerald-400',bg: 'bg-emerald-400/10', border: 'border-emerald-400/20', dot: 'bg-emerald-400', icon: 'workspace_premium', accent: '#34d399' },
+  rejected:     { label: 'Rejected',     color: 'text-rose-400',   bg: 'bg-rose-400/10',    border: 'border-rose-400/20',    dot: 'bg-rose-400',    icon: 'cancel',            accent: '#fb7185' },
 }
 
 const EMPTY = { title: '', company: '', url: '', location: '', salary: '', status: 'saved', notes: '' }
@@ -77,7 +77,7 @@ function Modal({ job, onClose, onSave }) {
         </div>
         <div className="flex gap-3 mt-5">
           <button onClick={onClose} className="flex-1 py-2.5 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/8 text-gray-900 dark:text-[#dae2fd] rounded-2xl font-semibold text-sm hover:bg-gray-200 dark:hover:bg-white/10 transition-all">Cancel</button>
-          <button onClick={save} disabled={saving} className="flex-1 py-2.5 bg-gradient-to-r from-primary to-primary-container text-[#0b1120] font-bold rounded-2xl text-sm disabled:opacity-50 transition-all">
+          <button onClick={save} disabled={saving} className="flex-1 py-2.5 btn-primary rounded-2xl text-sm disabled:opacity-50">
             {saving ? 'Saving...' : 'Save Job'}
           </button>
         </div>
@@ -88,39 +88,119 @@ function Modal({ job, onClose, onSave }) {
 
 function JobCard({ job, onEdit, onDelete, onStatus }) {
   const s = STATUS[job.status]
+  const [statusOpen, setStatusOpen] = useState(false)
+  const initials = job.company?.slice(0, 2).toUpperCase() || '??'
+
   return (
-    <div className="bg-white dark:bg-[#0f1829] border border-gray-200 dark:border-white/6 rounded-2xl p-4 group hover:shadow-lg transition-all">
-      <div className="flex items-start justify-between gap-2 mb-3">
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-bold text-gray-900 dark:text-[#dae2fd] truncate">{job.title}</p>
-          <p className="text-xs text-gray-600 dark:text-[#8892a4] flex items-center gap-1 mt-0.5 font-medium">
-            <span className="material-symbols-outlined text-xs">business</span>{job.company}
-          </p>
+    <div
+      className="group relative flex flex-col bg-white dark:bg-[#0d1526] rounded-2xl border border-gray-200 dark:border-white/[0.06] overflow-visible hover:shadow-xl dark:hover:shadow-[0_8px_32px_rgba(0,0,0,0.4)] hover:-translate-y-0.5 transition-all duration-200"
+      style={{ borderLeft: `3px solid ${s.accent}` }}
+    >
+      <div className="p-4 flex flex-col gap-3 flex-1">
+        {/* header */}
+        <div className="flex items-start gap-3">
+          <div
+            className="w-10 h-10 rounded-xl flex items-center justify-center text-xs font-extrabold flex-shrink-0 text-white shadow-sm"
+            style={{ background: `linear-gradient(135deg, ${s.accent}cc, ${s.accent}55)` }}
+          >
+            {initials}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-gray-900 dark:text-[#dae2fd] truncate leading-tight">{job.title}</p>
+            <p className="text-xs text-gray-500 dark:text-[#6b7a94] font-medium mt-0.5 truncate">{job.company}</p>
+          </div>
+          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg border text-[10px] font-bold flex-shrink-0 ${s.color} ${s.bg} ${s.border}`}>
+            <span className="material-symbols-outlined text-[11px]" style={{ fontVariationSettings: "'FILL' 1" }}>{s.icon}</span>
+            {s.label}
+          </span>
         </div>
-        <span className={`px-2 py-0.5 rounded-lg border text-[10px] font-bold flex-shrink-0 ${s.color} ${s.bg} ${s.border}`}>{s.label}</span>
+
+        {/* meta chips */}
+        {(job.location || job.salary) && (
+          <div className="flex flex-wrap gap-1.5">
+            {job.location && (
+              <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.06] rounded-lg text-[10px] text-gray-500 dark:text-[#6b7a94] font-medium">
+                <span className="material-symbols-outlined text-[10px]">location_on</span>{job.location}
+              </span>
+            )}
+            {job.salary && (
+              <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.06] rounded-lg text-[10px] text-gray-500 dark:text-[#6b7a94] font-medium">
+                <span className="material-symbols-outlined text-[10px]">payments</span>{job.salary}
+              </span>
+            )}
+          </div>
+        )}
+
+        {job.notes && (
+          <p className="text-[10px] text-gray-400 dark:text-[#3d4a5c] line-clamp-1 italic">&#8220;{job.notes}&#8221;</p>
+        )}
       </div>
 
-      <div className="flex flex-wrap gap-2 mb-3">
-        {job.location && <span className="flex items-center gap-1 text-[10px] text-gray-500 dark:text-[#3d4a5c] font-medium"><span className="material-symbols-outlined text-xs">location_on</span>{job.location}</span>}
-        {job.salary   && <span className="flex items-center gap-1 text-[10px] text-gray-500 dark:text-[#3d4a5c] font-medium"><span className="material-symbols-outlined text-xs">payments</span>{job.salary}</span>}
-      </div>
+      {/* footer */}
+      <div className="flex items-center gap-1.5 px-4 py-2.5 border-t border-gray-100 dark:border-white/[0.05] bg-gray-50/50 dark:bg-white/[0.02] rounded-b-2xl">
 
-      {job.notes && <p className="text-[10px] text-gray-500 dark:text-[#3d4a5c] mb-3 truncate font-medium">{job.notes}</p>}
+        {/* custom status dropdown */}
+        <div className="relative flex-1">
+          <button
+            type="button"
+            onClick={() => setStatusOpen(o => !o)}
+            className="flex items-center gap-1 text-[11px] font-semibold transition-colors"
+            style={{ color: s.accent }}
+          >
+            <span className="material-symbols-outlined text-[13px]" style={{ fontVariationSettings: "'FILL' 1" }}>{s.icon}</span>
+            {s.label}
+            <span className={`material-symbols-outlined text-[13px] transition-transform duration-200 ${statusOpen ? 'rotate-180' : ''}`}>expand_more</span>
+          </button>
 
-      <div className="flex items-center gap-2 pt-3 border-t border-gray-200 dark:border-white/5">
-        <select value={job.status} onChange={e => onStatus(job.id, e.target.value)}
-          className="flex-1 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/8 text-[10px] text-gray-700 dark:text-[#8892a4] rounded-xl px-2 py-1.5 outline-none font-medium">
-          {Object.entries(STATUS).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
-        </select>
-        {job.url && <a href={job.url} target="_blank" rel="noreferrer" className="w-7 h-7 flex items-center justify-center rounded-xl bg-gray-100 dark:bg-white/5 hover:bg-primary/15 text-gray-600 dark:text-[#8892a4] hover:text-primary transition-all">
-          <span className="material-symbols-outlined text-sm">open_in_new</span>
-        </a>}
-        <button onClick={() => onEdit(job)} className="w-7 h-7 flex items-center justify-center rounded-xl bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-600 dark:text-[#8892a4] hover:text-gray-900 dark:hover:text-[#dae2fd] transition-all">
-          <span className="material-symbols-outlined text-sm">edit</span>
-        </button>
-        <button onClick={() => onDelete(job.id)} className="w-7 h-7 flex items-center justify-center rounded-xl bg-gray-100 dark:bg-white/5 hover:bg-red-400/15 text-gray-600 dark:text-[#8892a4] hover:text-red-400 transition-all">
-          <span className="material-symbols-outlined text-sm">delete</span>
-        </button>
+          {statusOpen && (
+            <>
+              <div className="fixed inset-0 z-10" onClick={() => setStatusOpen(false)} />
+              <div className="absolute bottom-full left-0 mb-2 z-20 w-44 bg-white dark:bg-[#0d1526] border border-gray-200 dark:border-white/10 rounded-xl shadow-2xl overflow-hidden">
+                {Object.entries(STATUS).map(([k, v]) => (
+                  <button
+                    key={k}
+                    type="button"
+                    onClick={() => { onStatus(job.id, k); setStatusOpen(false) }}
+                    className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-left transition-colors ${
+                      job.status === k
+                        ? 'bg-gray-100 dark:bg-white/[0.08]'
+                        : 'hover:bg-gray-50 dark:hover:bg-white/[0.04]'
+                    }`}
+                  >
+                    <span
+                      className="material-symbols-outlined text-[15px] flex-shrink-0"
+                      style={{ color: v.accent, fontVariationSettings: "'FILL' 1" }}
+                    >{v.icon}</span>
+                    <span className="text-[12px] font-semibold text-gray-800 dark:text-[#dae2fd]">{v.label}</span>
+                    {job.status === k && (
+                      <span className="material-symbols-outlined text-[13px] ml-auto" style={{ color: v.accent }}>check</span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+
+        <div className="flex items-center gap-1">
+          {job.url && (
+            <a href={job.url} target="_blank" rel="noreferrer"
+              className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 dark:text-[#3d4a5c] hover:text-primary hover:bg-primary/10 transition-all"
+            >
+              <span className="material-symbols-outlined text-[15px]">open_in_new</span>
+            </a>
+          )}
+          <button onClick={() => onEdit(job)}
+            className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 dark:text-[#3d4a5c] hover:text-gray-700 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/10 transition-all"
+          >
+            <span className="material-symbols-outlined text-[15px]">edit</span>
+          </button>
+          <button onClick={() => onDelete(job.id)}
+            className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 dark:text-[#3d4a5c] hover:text-rose-400 hover:bg-rose-400/10 transition-all"
+          >
+            <span className="material-symbols-outlined text-[15px]">delete</span>
+          </button>
+        </div>
       </div>
     </div>
   )
@@ -296,7 +376,7 @@ export default function Jobs() {
           <p className="text-sm text-gray-700 dark:text-[#8892a4] mt-0.5 font-medium">Track your applications and manage your pipeline</p>
         </div>
         <button onClick={() => setModal('add')}
-          className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary to-primary-container text-[#0b1120] text-sm font-bold rounded-2xl hover:opacity-90 active:scale-95 transition-all self-start sm:self-auto">
+          className="flex items-center gap-2 px-4 py-2.5 btn-primary text-sm rounded-2xl active:scale-95 self-start sm:self-auto">
           <span className="material-symbols-outlined text-base">add</span>Add Job
         </button>
       </div>
@@ -473,7 +553,7 @@ export default function Jobs() {
                 placeholder="Location"
                 className="sm:w-40 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/8 rounded-xl px-3 py-2.5 text-sm text-gray-900 dark:text-[#dae2fd] placeholder:text-gray-400 dark:placeholder:text-[#3d4a5c] outline-none focus:border-primary/30 transition-all font-medium" />
               <button onClick={handleManualSearch} disabled={loadingManual || !manualSearch.trim()}
-                className="py-2.5 px-5 bg-gradient-to-r from-primary to-primary-container text-[#0b1120] font-bold rounded-xl text-sm disabled:opacity-50 transition-all">
+                className="py-2.5 px-5 btn-primary rounded-xl text-sm disabled:opacity-50">
                 {loadingManual ? 'Searching...' : 'Search'}
               </button>
             </div>
@@ -535,13 +615,26 @@ export default function Jobs() {
 
       {/* Pipeline summary */}
       <div className="grid grid-cols-5 gap-2 sm:gap-3">
-        {Object.entries(STATUS).map(([k, v]) => (
-          <button key={k} onClick={() => setFilter(filter === k ? 'all' : k)}
-            className={`p-3 rounded-2xl border text-center transition-all hover:shadow-md ${filter === k ? `${v.bg} ${v.border} shadow-sm` : 'bg-white dark:bg-[#0f1829] border-gray-200 dark:border-white/6 hover:border-gray-300 dark:hover:border-white/10'}`}>
-            <p className={`text-lg sm:text-xl font-extrabold font-headline ${filter === k ? v.color : 'text-gray-900 dark:text-[#dae2fd]'}`}>{counts[k] || 0}</p>
-            <p className={`text-[9px] sm:text-[10px] font-bold mt-0.5 ${filter === k ? v.color : 'text-gray-500 dark:text-[#3d4a5c]'}`}>{v.label}</p>
-          </button>
-        ))}
+        {Object.entries(STATUS).map(([k, v]) => {
+          const active = filter === k
+          return (
+            <button
+              key={k}
+              onClick={() => setFilter(active ? 'all' : k)}
+              className={`relative group flex flex-col items-center justify-center gap-1 py-3 px-2 rounded-2xl border transition-all duration-200 overflow-hidden ${
+                active
+                  ? `${v.bg} ${v.border} shadow-md`
+                  : 'bg-white dark:bg-[#0d1526] border-gray-200 dark:border-white/[0.06] hover:border-gray-300 dark:hover:border-white/[0.12] hover:shadow-md'
+              }`}
+            >
+              {/* accent top bar */}
+              <div className="absolute top-0 left-0 right-0 h-[2px] rounded-t-2xl transition-opacity duration-200" style={{ background: v.accent, opacity: active ? 1 : 0 }} />
+              <span className={`material-symbols-outlined text-[18px] transition-colors duration-200 ${active ? v.color : 'text-gray-400 dark:text-[#3d4a5c] group-hover:' + v.color}`} style={{ fontVariationSettings: active ? "'FILL' 1" : "'FILL' 0" }}>{v.icon}</span>
+              <p className={`text-base sm:text-lg font-extrabold font-headline leading-none transition-colors duration-200 ${active ? v.color : 'text-gray-900 dark:text-[#dae2fd]'}`}>{counts[k] || 0}</p>
+              <p className={`text-[9px] sm:text-[10px] font-bold transition-colors duration-200 ${active ? v.color : 'text-gray-400 dark:text-[#3d4a5c]'}`}>{v.label}</p>
+            </button>
+          )
+        })}
       </div>
 
       {/* Search */}

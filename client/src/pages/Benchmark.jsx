@@ -167,7 +167,7 @@ export default function Benchmark() {
         <button
           onClick={() => run(selectedResume)}
           disabled={loading || !selectedResume || resumes.length === 0}
-          className="mt-4 w-full py-3 sm:py-4 bg-gradient-to-r from-primary to-primary-container text-[#0b1120] text-xs sm:text-sm font-bold rounded-xl hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 shadow-lg"
+          className="mt-4 w-full py-3 sm:py-4 btn-primary text-xs sm:text-sm rounded-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           {loading
             ? <><Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" /> Analyzing with AI...</>

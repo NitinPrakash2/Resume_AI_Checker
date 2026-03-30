@@ -200,7 +200,7 @@ export default function Upload() {
                 </div>
                 <h3 className="text-2xl font-headline font-bold text-gray-900 dark:text-[#dae2fd] mb-2">Drop your resume here</h3>
                 <p className="text-gray-600 dark:text-[#8892a4] mb-8 font-medium">Support for PDF, DOCX, and DOC (Max 10MB)</p>
-                <label className="px-8 py-4 bg-primary text-[#0b1120] rounded-xl font-bold cursor-pointer hover:shadow-[0_0_30px_rgba(163,166,255,0.3)] transition-all">
+                <label className="px-8 py-4 btn-primary rounded-xl cursor-pointer">
                   Select File from Device
                 </label>
                 <div className="mt-10 flex items-center gap-8 text-gray-400 dark:text-[#8892a4]/60">
@@ -230,7 +230,7 @@ export default function Upload() {
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-2">
-                <p className="font-bold text-gray-900 dark:text-[#dae2fd]">ATS Score</p>
+                <p className="font-bold text-gray-900 dark:text-[#dae2fd]">Est. ATS Score</p>
                 <p className="text-sm text-gray-700 dark:text-[#8892a4] leading-relaxed font-medium">Real-time compatibility check against modern applicant tracking systems.</p>
               </div>
               <div className="space-y-2">
@@ -274,7 +274,7 @@ export default function Upload() {
           <button
             type="submit"
             disabled={loading || !file}
-            className="w-full py-4 bg-gradient-to-r from-primary to-primary-container text-[#0b1120] font-bold rounded-2xl transition-all hover:shadow-[0_0_30px_rgba(163,166,255,0.3)] active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-base"
+            className="w-full py-4 btn-primary rounded-2xl disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-base"
           >
             <span className="material-symbols-outlined text-xl">auto_awesome</span>
             {loading ? 'Analyzing...' : 'Analyze Resume'}

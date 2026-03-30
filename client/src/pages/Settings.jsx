@@ -1,6 +1,30 @@
 import { useEffect, useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { getMe, updateSettings, testApiKey, changePassword, forgotPassword, verifyOtp, resetPassword, getSavedKeys, saveApiKey, deleteSavedKey } from '../services/resumeService'
+import { Eye, EyeOff } from 'lucide-react'
+
+function PasswordInput({ value, onChange, placeholder, className }) {
+  const [show, setShow] = useState(false)
+  return (
+    <div className="relative">
+      <input
+        type={show ? 'text' : 'password'}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        className={`${className} pr-12`}
+      />
+      <button
+        type="button"
+        onClick={() => setShow(s => !s)}
+        tabIndex={-1}
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+      >
+        {show ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+      </button>
+    </div>
+  )
+}
 
 const PROVIDERS = [
   {
@@ -99,6 +123,7 @@ export default function Settings() {
   const [activeModel, setActiveModel]       = useState('')
   const [apiKey, setApiKey]                 = useState('')
   const [showKey, setShowKey]               = useState(false)
+  const [providerOpen, setProviderOpen]     = useState(false)
   const [testing, setTesting]               = useState(false)
   const [testResult, setTestResult]         = useState(null)
   const [savedKeys, setSavedKeys]           = useState({})
@@ -113,9 +138,6 @@ export default function Settings() {
   const [changingPassword, setChangingPassword] = useState(false)
   const [passwordChanged, setPasswordChanged] = useState(false)
   const [passwordError, setPasswordError] = useState('')
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
-  const [showNewPassword, setShowNewPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   // Forgot / reset password (OTP flow)
   const [fpOpen, setFpOpen]           = useState(false)
@@ -526,19 +548,12 @@ export default function Settings() {
                   <div className="space-y-2">
                     <label className="text-[13px] font-semibold text-gray-600 dark:text-slate-400 ml-1">Current Password</label>
                     <div className="relative">
-                      <input
+                      <PasswordInput
                         value={currentPassword}
                         onChange={e => { setCurrentPassword(e.target.value); setPasswordError('') }}
-                        className="w-full bg-white dark:bg-[#0D111C] border-2 border-gray-200 dark:border-transparent focus:border-blue-600 dark:focus:border-[#A6ADFF] focus:ring-1 focus:ring-blue-600 dark:focus:ring-[#A6ADFF] rounded-xl px-4 py-3.5 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-600 outline-none transition-all text-[15px] pr-12 font-semibold"
                         placeholder="••••••••••••"
-                        type={showCurrentPassword ? 'text' : 'password'}
+                        className="w-full bg-white dark:bg-[#0D111C] border-2 border-gray-200 dark:border-transparent focus:border-blue-600 dark:focus:border-[#A6ADFF] focus:ring-1 focus:ring-blue-600 dark:focus:ring-[#A6ADFF] rounded-xl px-4 py-3.5 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-600 outline-none transition-all text-[15px] font-semibold"
                       />
-                      <button
-                        onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-                      >
-                        <span className="material-symbols-outlined text-[20px]">{showCurrentPassword ? 'visibility_off' : 'visibility'}</span>
-                      </button>
                     </div>
                     <button
                       type="button"
@@ -554,37 +569,23 @@ export default function Settings() {
                     <div className="space-y-2">
                       <label className="text-[13px] font-semibold text-gray-600 dark:text-slate-400 ml-1">New Password</label>
                       <div className="relative">
-                        <input
+                        <PasswordInput
                           value={newPassword}
                           onChange={e => { setNewPassword(e.target.value); setPasswordError('') }}
-                          className="w-full bg-white dark:bg-[#0D111C] border-2 border-gray-200 dark:border-transparent focus:border-blue-600 dark:focus:border-[#A6ADFF] focus:ring-1 focus:ring-blue-600 dark:focus:ring-[#A6ADFF] rounded-xl px-4 py-3.5 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-600 outline-none transition-all text-[15px] pr-12 font-semibold"
                           placeholder="Minimum 6 chars"
-                          type={showNewPassword ? 'text' : 'password'}
+                          className="w-full bg-white dark:bg-[#0D111C] border-2 border-gray-200 dark:border-transparent focus:border-blue-600 dark:focus:border-[#A6ADFF] focus:ring-1 focus:ring-blue-600 dark:focus:ring-[#A6ADFF] rounded-xl px-4 py-3.5 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-600 outline-none transition-all text-[15px] font-semibold"
                         />
-                        <button
-                          onClick={() => setShowNewPassword(!showNewPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-                        >
-                          <span className="material-symbols-outlined text-[20px]">{showNewPassword ? 'visibility_off' : 'visibility'}</span>
-                        </button>
                       </div>
                     </div>
                     <div className="space-y-2">
                       <label className="text-[13px] font-semibold text-gray-600 dark:text-slate-400 ml-1">Confirm Password</label>
                       <div className="relative">
-                        <input
+                        <PasswordInput
                           value={confirmPassword}
                           onChange={e => { setConfirmPassword(e.target.value); setPasswordError('') }}
-                          className="w-full bg-white dark:bg-[#0D111C] border-2 border-gray-200 dark:border-transparent focus:border-blue-600 dark:focus:border-[#A6ADFF] focus:ring-1 focus:ring-blue-600 dark:focus:ring-[#A6ADFF] rounded-xl px-4 py-3.5 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-600 outline-none transition-all text-[15px] pr-12 font-semibold"
                           placeholder="Must match new password"
-                          type={showConfirmPassword ? 'text' : 'password'}
+                          className="w-full bg-white dark:bg-[#0D111C] border-2 border-gray-200 dark:border-transparent focus:border-blue-600 dark:focus:border-[#A6ADFF] focus:ring-1 focus:ring-blue-600 dark:focus:ring-[#A6ADFF] rounded-xl px-4 py-3.5 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-600 outline-none transition-all text-[15px] font-semibold"
                         />
-                        <button
-                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-                        >
-                          <span className="material-symbols-outlined text-[20px]">{showConfirmPassword ? 'visibility_off' : 'visibility'}</span>
-                        </button>
                       </div>
                     </div>
                   </div>
@@ -604,7 +605,7 @@ export default function Settings() {
                     <button
                       onClick={handleChangePassword}
                       disabled={changingPassword || !currentPassword || !newPassword || !confirmPassword}
-                      className="bg-[#B4B9FF] text-[#0B0F19] font-bold text-[14px] px-6 py-3.5 rounded-xl flex items-center justify-center gap-2 hover:bg-[#9FA5FC] transition-colors disabled:opacity-50 disabled:cursor-not-allowed w-max"
+                      className="btn-primary text-[14px] px-6 py-3.5 rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed w-max"
                     >
                       {changingPassword ? (
                         <><span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>Updating...</>
@@ -627,152 +628,187 @@ export default function Settings() {
           <div className="w-full h-px bg-gray-200 dark:bg-slate-800/50"></div>
 
           {/* AI Provider Section */}
-          <div className="space-y-8 scroll-mt-8" ref={aiRef} id="ai">
+          <div className="space-y-6 scroll-mt-8" ref={aiRef} id="ai">
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 rounded-xl bg-blue-400/10 dark:bg-[#1D273A] flex items-center justify-center">
                 <span className="material-symbols-outlined text-blue-400">smart_toy</span>
               </div>
-              <h4 className="text-[22px] font-bold text-gray-900 dark:text-white tracking-wide">AI Models</h4>
+              <div>
+                <h4 className="text-[22px] font-bold text-gray-900 dark:text-white tracking-wide">AI Models</h4>
+                <p className="text-[13px] text-gray-500 dark:text-slate-500 mt-0.5">Choose your AI provider, model, and connect your API key</p>
+              </div>
             </div>
 
-            <div className="space-y-4">
-              <label className="text-[13px] font-semibold text-gray-600 dark:text-slate-400">Select AI Provider</label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {PROVIDERS.map(p => (
+            <div className="bg-gray-50 dark:bg-[#161B2B] rounded-2xl border border-gray-200 dark:border-slate-800/60 overflow-hidden">
+
+              {/* ── Step 1: Provider picker ── */}
+              <div className="p-5 border-b border-gray-200 dark:border-slate-800/60">
+                <p className="text-[11px] font-extrabold uppercase tracking-widest text-gray-400 dark:text-slate-500 mb-3">Step 1 — Choose Provider</p>
+                <div className="relative">
                   <button
-                    key={p.id}
-                    onClick={() => handleProviderChange(p.id)}
-                    className={`p-5 rounded-xl border-2 text-left transition-all relative ${
-                      activeProvider === p.id
-                        ? 'border-blue-600/40 bg-blue-600/5 dark:border-[#A6ADFF]/40 dark:bg-[#A6ADFF]/5 shadow-md'
-                        : 'border-gray-200 dark:border-slate-800/60 bg-gray-50 dark:bg-[#161B2B] hover:border-blue-600/20 dark:hover:border-slate-700 hover:shadow-lg'
+                    type="button"
+                    onClick={() => setProviderOpen(o => !o)}
+                    className={`w-full flex items-center justify-between gap-3 px-4 py-3.5 bg-white dark:bg-[#0D111C] border-2 rounded-xl transition-all ${
+                      providerOpen ? 'border-[#A6ADFF] dark:border-[#A6ADFF]' : 'border-gray-200 dark:border-transparent hover:border-gray-300 dark:hover:border-slate-700'
                     }`}
                   >
-                    {activeProvider === p.id && (
-                      <span className="absolute top-4 right-4 w-5 h-5 bg-blue-600 dark:bg-[#A6ADFF] rounded-full flex items-center justify-center shadow-md">
-                        <span className="material-symbols-outlined text-white dark:text-[#0B0F19] text-[14px] font-bold">check</span>
-                      </span>
-                    )}
-                    {savedKeys[p.id] && activeProvider !== p.id && (
-                      <span className="absolute top-4 right-4 w-2 h-2 bg-green-400 rounded-full shadow-[0_0_8px_rgba(74,222,128,0.5)]" title="Key saved" />
-                    )}
-                    <div className="flex items-center gap-3 mb-2.5">
-                      <span className="text-[22px]">{p.icon}</span>
-                      <span className={`text-[15px] font-bold ${activeProvider === p.id ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-slate-300'}`}>{p.name}</span>
+                    <div className="flex items-center gap-3">
+                      <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-[18px] flex-shrink-0 ${selected.bg} border ${selected.border}`}>{selected.icon}</span>
+                      <div className="text-left">
+                        <p className="text-[14px] font-bold text-gray-900 dark:text-white">{selected.name}</p>
+                        <p className="text-[11px] text-gray-500 dark:text-slate-500">{selected.description}</p>
+                      </div>
                     </div>
-                    <p className="text-[12px] text-gray-700 dark:text-slate-400 leading-relaxed mb-3 pr-4 font-semibold">{p.description}</p>
-                    <span className={`inline-block text-[10px] font-bold px-2.5 py-1 rounded-lg border ${p.badgeColor}`}>{p.badge}</span>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${selected.badgeColor}`}>{selected.badge}</span>
+                      <span className={`material-symbols-outlined text-[18px] text-gray-400 transition-transform duration-200 ${providerOpen ? 'rotate-180' : ''}`}>expand_more</span>
+                    </div>
                   </button>
-                ))}
-              </div>
-            </div>
 
-            {/* API Key Input */}
-            <div className="bg-gray-50 dark:bg-[#161B2B] p-6 rounded-2xl border-2 border-gray-200 dark:border-slate-800/60 space-y-5">
-              <div className="flex items-center justify-between">
-                <label className="text-[14px] font-semibold text-gray-900 dark:text-white">
-                  <span className={selected.color}>{selected.name}</span> API Key
-                </label>
-                <a
-                  href={selected.getKeyUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className={`flex items-center gap-1 px-3 py-1.5 ${selected.bg} border ${selected.border} ${selected.color} text-[11px] font-bold rounded-lg hover:opacity-80 transition-all`}
-                >
-                  <span className="material-symbols-outlined text-[14px]">open_in_new</span>
-                  Get Free Key
-                </a>
-              </div>
-
-              <div className="relative">
-                <div className={`absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 ${selected.bg} border ${selected.border} rounded-lg flex items-center justify-center text-[16px]`}>
-                  {selected.icon}
+                  {/* Dropdown */}
+                  {providerOpen && (
+                    <div className="absolute z-20 top-full left-0 right-0 mt-1.5 bg-white dark:bg-[#0D111C] border border-gray-200 dark:border-slate-700 rounded-xl shadow-2xl overflow-hidden">
+                      {PROVIDERS.map(p => (
+                        <button
+                          key={p.id}
+                          type="button"
+                          onClick={() => { handleProviderChange(p.id); setProviderOpen(false) }}
+                          className={`w-full flex items-center gap-3 px-4 py-3 transition-all text-left ${
+                            activeProvider === p.id
+                              ? 'bg-[#A6ADFF]/10 border-l-2 border-[#A6ADFF]'
+                              : 'hover:bg-gray-50 dark:hover:bg-white/5 border-l-2 border-transparent'
+                          }`}
+                        >
+                          <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-[16px] flex-shrink-0 ${p.bg} border ${p.border}`}>{p.icon}</span>
+                          <div className="flex-1 min-w-0">
+                            <p className={`text-[13px] font-bold ${activeProvider === p.id ? 'text-[#A6ADFF]' : 'text-gray-900 dark:text-white'}`}>{p.name}</p>
+                            <p className="text-[11px] text-gray-500 dark:text-slate-500 truncate">{p.description}</p>
+                          </div>
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${p.badgeColor}`}>{p.badge}</span>
+                            {savedKeys[p.id] && <span className="w-2 h-2 bg-green-400 rounded-full" title="Key saved" />}
+                            {activeProvider === p.id && <span className="material-symbols-outlined text-[#A6ADFF] text-[16px]">check_circle</span>}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
-                <input
-                  type={showKey ? 'text' : 'password'}
-                  value={apiKey}
-                  onChange={e => { setApiKey(e.target.value); setTestResult(null); setSavedKey(false) }}
-                  placeholder={selected.placeholder}
-                  className="w-full bg-white dark:bg-[#0D111C] border-2 border-gray-200 dark:border-transparent focus:border-blue-600 dark:focus:border-[#A6ADFF] focus:ring-1 focus:ring-blue-600 dark:focus:ring-[#A6ADFF] rounded-xl pl-14 pr-28 py-4 text-[14px] text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-600 outline-none transition-all font-mono tracking-wide font-semibold"
-                />
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
-                  <button
-                    onClick={() => setShowKey(!showKey)}
-                    className="p-1 text-gray-400 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors flex items-center justify-center"
+              </div>
+
+              {/* ── Step 2: Model picker ── */}
+              <div className="p-5 border-b border-gray-200 dark:border-slate-800/60">
+                <p className="text-[11px] font-extrabold uppercase tracking-widest text-gray-400 dark:text-slate-500 mb-3">Step 2 — Choose Model</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {[{ id: '', label: 'Default Recommended' }, ...selected.models].map(m => (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => setActiveModel(m.id)}
+                      className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl border text-left transition-all ${
+                        activeModel === m.id
+                          ? 'bg-[#A6ADFF]/10 border-[#A6ADFF]/40 text-[#A6ADFF]'
+                          : 'bg-white dark:bg-[#0D111C] border-gray-200 dark:border-slate-700/60 text-gray-700 dark:text-slate-300 hover:border-gray-300 dark:hover:border-slate-600'
+                      }`}
+                    >
+                      <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+                        activeModel === m.id ? 'bg-[#A6ADFF]' : 'bg-gray-300 dark:bg-slate-600'
+                      }`} />
+                      <span className="text-[12px] font-semibold truncate">{m.label}</span>
+                      {activeModel === m.id && <span className="material-symbols-outlined text-[14px] ml-auto flex-shrink-0">check</span>}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* ── Step 3: API Key ── */}
+              <div className="p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-[11px] font-extrabold uppercase tracking-widest text-gray-400 dark:text-slate-500">Step 3 — Enter API Key</p>
+                  <a
+                    href={selected.getKeyUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={`flex items-center gap-1 px-2.5 py-1 ${selected.bg} border ${selected.border} ${selected.color} text-[11px] font-bold rounded-lg hover:opacity-80 transition-all`}
                   >
-                    <span className="material-symbols-outlined text-[20px]">{showKey ? 'visibility_off' : 'visibility'}</span>
-                  </button>
+                    <span className="material-symbols-outlined text-[13px]">open_in_new</span>
+                    Get Free Key
+                  </a>
+                </div>
+
+                {/* Key input */}
+                <div className="relative mb-3">
+                  <span className={`absolute left-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-lg flex items-center justify-center text-[15px] ${selected.bg} border ${selected.border}`}>
+                    {selected.icon}
+                  </span>
+                  <input
+                    type={showKey ? 'text' : 'password'}
+                    value={apiKey}
+                    onChange={e => { setApiKey(e.target.value); setTestResult(null); setSavedKey(false) }}
+                    placeholder={selected.placeholder}
+                    className="w-full bg-white dark:bg-[#0D111C] border-2 border-gray-200 dark:border-slate-700/60 focus:border-[#A6ADFF] rounded-xl pl-12 pr-10 py-3.5 text-[13px] text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-600 outline-none transition-all font-mono"
+                  />
                   <button
+                    type="button"
+                    onClick={() => setShowKey(s => !s)}
+                    tabIndex={-1}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 dark:hover:text-white transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">{showKey ? 'visibility_off' : 'visibility'}</span>
+                  </button>
+                </div>
+
+                {/* Test result */}
+                {testResult && (
+                  <div className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-[12px] font-semibold mb-3 ${
+                    testResult.ok
+                      ? 'bg-green-500/10 border border-green-500/20 text-green-400'
+                      : 'bg-red-500/10 border border-red-500/20 text-red-400'
+                  }`}>
+                    <span className="material-symbols-outlined text-[16px]">{testResult.ok ? 'check_circle' : 'error'}</span>
+                    {testResult.msg}
+                  </div>
+                )}
+
+                {/* Action buttons */}
+                <div className="flex gap-2">
+                  <button
+                    type="button"
                     onClick={handleTest}
                     disabled={testing || !apiKey}
-                    className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-gray-100 dark:bg-white/5 border border-gray-300 dark:border-slate-700 text-[11px] font-bold text-gray-700 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/10 rounded-lg transition-all disabled:opacity-40"
+                    className="flex items-center gap-1.5 px-4 py-2.5 bg-white dark:bg-white/5 border border-gray-200 dark:border-slate-700 text-[12px] font-bold text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl transition-all disabled:opacity-40"
                   >
-                    {testing ? (
-                      <span className="material-symbols-outlined animate-spin text-[14px]">progress_activity</span>
-                    ) : (
-                      <span className="material-symbols-outlined text-[14px]">bolt</span>
-                    )}
-                    {testing ? 'Testing' : 'Test'}
+                    {testing
+                      ? <><span className="material-symbols-outlined animate-spin text-[15px]">progress_activity</span>Testing...</>
+                      : <><span className="material-symbols-outlined text-[15px]">bolt</span>Test Key</>}
                   </button>
+                  <button
+                    type="button"
+                    onClick={handleSaveApiKey}
+                    disabled={savingKey || testing || !apiKey || isKeyActive}
+                    className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 btn-primary text-[12px] rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {savingKey
+                      ? <><span className="material-symbols-outlined animate-spin text-[15px]">progress_activity</span>Saving...</>
+                      : isKeyActive
+                      ? <><span className="material-symbols-outlined text-[15px]">check_circle</span>Active & Saved</>
+                      : <><span className="material-symbols-outlined text-[15px]">save</span>Save & Activate</>}
+                  </button>
+                  {isLoggedIn && (
+                    <button
+                      type="button"
+                      onClick={handleSaveToHistory}
+                      disabled={savingToHistory || !apiKey}
+                      title="Save to history"
+                      className="w-10 h-10 flex items-center justify-center rounded-xl border border-blue-600/30 dark:border-blue-400/30 text-blue-600 dark:text-blue-400 hover:bg-blue-600/10 dark:hover:bg-blue-400/10 transition-colors disabled:opacity-40"
+                    >
+                      {savingToHistory
+                        ? <span className="material-symbols-outlined animate-spin text-[16px]">progress_activity</span>
+                        : <span className="material-symbols-outlined text-[16px]">bookmark_add</span>}
+                    </button>
+                  )}
                 </div>
               </div>
-
-              {testResult && (
-                <div className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-[13px] font-semibold ${
-                  testResult.ok
-                    ? 'bg-green-500/10 border border-green-500/20 text-green-400'
-                    : 'bg-red-500/10 border border-red-500/20 text-red-400'
-                }`}>
-                  <span className="material-symbols-outlined text-[18px]">{testResult.ok ? 'check_circle' : 'error'}</span>
-                  {testResult.msg}
-                </div>
-              )}
-            </div>
-
-            {/* Model Selection */}
-            <div className="space-y-3">
-              <label className="text-[13px] font-semibold text-gray-600 dark:text-slate-400">Select Model <span className="text-gray-500 dark:text-slate-500 font-normal">(optional)</span></label>
-              <select
-                value={activeModel}
-                onChange={e => setActiveModel(e.target.value)}
-                className="w-full bg-gray-50 dark:bg-[#131722] border-2 border-gray-200 dark:border-transparent focus:border-blue-600 dark:focus:border-[#A6ADFF] focus:ring-1 focus:ring-blue-600 dark:focus:ring-[#A6ADFF] rounded-xl px-4 py-3.5 text-[14px] text-gray-900 dark:text-white outline-none transition-all appearance-none cursor-pointer font-semibold"
-                style={{ backgroundImage: `url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem center', backgroundSize: '1.2em' }}
-              >
-                <option value="">Default Recommended</option>
-                {selected.models.map(m => (
-                  <option key={m.id} value={m.id}>{m.label}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Save Key Buttons */}
-            <div className="flex flex-wrap gap-3">
-              <button
-                onClick={handleSaveApiKey}
-                disabled={savingKey || testing || !apiKey || isKeyActive}
-                className="bg-[#B4B9FF] text-[#0B0F19] font-bold text-[14px] px-8 py-3.5 rounded-xl flex items-center gap-2 hover:bg-[#9FA5FC] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {savingKey && testing ? (
-                  <><span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>Verifying...</>
-                ) : savingKey ? (
-                  <><span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>Saving...</>
-                ) : isKeyActive ? (
-                  <><span className="material-symbols-outlined text-[18px]">check_circle</span>Active</>
-                ) : (
-                  <><span>Set as Active</span><span className="material-symbols-outlined text-[18px]">arrow_forward</span></>
-                )}
-              </button>
-              {isLoggedIn && (
-                <button
-                  onClick={handleSaveToHistory}
-                  disabled={savingToHistory || !apiKey}
-                  className="flex items-center gap-2 px-5 py-3.5 rounded-xl border-2 border-[#B4B9FF]/30 text-[#B4B9FF] text-[14px] font-bold hover:bg-[#B4B9FF]/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {savingToHistory
-                    ? <><span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>Saving...</>
-                    : <><span className="material-symbols-outlined text-[18px]">bookmark_add</span>Save to History</>}
-                </button>
-              )}
             </div>
           </div>
 
@@ -965,7 +1001,7 @@ export default function Settings() {
               <div className="text-center space-y-4">
                 <span className="material-symbols-outlined text-green-400 text-[48px]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
                 <p className="text-[15px] font-semibold text-gray-900 dark:text-white">{fpSuccess}</p>
-                <button onClick={resetFpFlow} className="bg-[#B4B9FF] text-[#0B0F19] font-bold text-[14px] px-6 py-3 rounded-xl hover:bg-[#9FA5FC] transition-colors">
+                <button onClick={resetFpFlow} className="btn-primary text-[14px] px-6 py-3 rounded-xl">
                   Done
                 </button>
               </div>
@@ -996,7 +1032,7 @@ export default function Settings() {
                 <button
                   type="submit"
                   disabled={fpLoading || !fpEmail}
-                  className="w-full bg-[#B4B9FF] text-[#0B0F19] font-bold text-[14px] py-3.5 rounded-xl flex items-center justify-center gap-2 hover:bg-[#9FA5FC] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full btn-primary text-[14px] py-3.5 rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {fpLoading ? <><span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>Sending...</> : <>Send OTP <span className="material-symbols-outlined text-[18px]">send</span></>}
                 </button>
@@ -1024,7 +1060,7 @@ export default function Settings() {
                 <button
                   type="submit"
                   disabled={fpLoading || fpOtp.length < 6}
-                  className="w-full bg-[#B4B9FF] text-[#0B0F19] font-bold text-[14px] py-3.5 rounded-xl flex items-center justify-center gap-2 hover:bg-[#9FA5FC] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full btn-primary text-[14px] py-3.5 rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {fpLoading ? <><span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>Verifying...</> : <>Verify OTP <span className="material-symbols-outlined text-[18px]">verified</span></>}
                 </button>
@@ -1040,8 +1076,7 @@ export default function Settings() {
               <form onSubmit={handleFpReset} className="space-y-5">
                 <div className="space-y-2">
                   <label className="text-[13px] font-semibold text-gray-600 dark:text-slate-400">New Password</label>
-                  <input
-                    type="password"
+                  <PasswordInput
                     value={fpNewPass}
                     onChange={e => { setFpNewPass(e.target.value); setFpError('') }}
                     placeholder="Minimum 6 characters"
@@ -1050,8 +1085,7 @@ export default function Settings() {
                 </div>
                 <div className="space-y-2">
                   <label className="text-[13px] font-semibold text-gray-600 dark:text-slate-400">Confirm Password</label>
-                  <input
-                    type="password"
+                  <PasswordInput
                     value={fpConfirm}
                     onChange={e => { setFpConfirm(e.target.value); setFpError('') }}
                     placeholder="Must match new password"
@@ -1067,7 +1101,7 @@ export default function Settings() {
                 <button
                   type="submit"
                   disabled={fpLoading || !fpNewPass || !fpConfirm}
-                  className="w-full bg-[#B4B9FF] text-[#0B0F19] font-bold text-[14px] py-3.5 rounded-xl flex items-center justify-center gap-2 hover:bg-[#9FA5FC] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full btn-primary text-[14px] py-3.5 rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {fpLoading ? <><span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>Resetting...</> : <>Reset Password <span className="material-symbols-outlined text-[18px]">lock_reset</span></>}
                 </button>
